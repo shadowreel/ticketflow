@@ -1,0 +1,12 @@
+# Credenciales reales de Firebase (usa firebaseConfig.example.js como plantilla)
+js/core/firebaseConfig.js
+
+# Prototipo de la Fase 1 anterior, conservado solo como referencia local
+legacy/
+
+# Sistema operativo / editor
+.DS_Store
+Thumbs.db
+
+# Configuración local del entorno de desarrollo (no forma parte del producto)
+.claude/

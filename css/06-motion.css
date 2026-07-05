@@ -1,0 +1,81 @@
+/* =========================================================
+   Microanimaciones — cada una con un propósito puntual:
+   dar retroalimentación de que la interfaz respondió, nunca
+   decoración porque sí.
+   ========================================================= */
+
+/* Elevación suave en tarjetas al pasar el cursor */
+.card, .person-card {
+  transition: transform var(--duration-base) var(--ease), box-shadow var(--duration-base) var(--ease), border-color var(--duration-base) var(--ease);
+}
+.card:hover, .person-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Fade + slide al entrar una vista nueva (aplicado por router.js a #viewContainer) */
+@keyframes view-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.view-enter { animation: view-fade-in 260ms var(--ease); }
+
+/* Aparición progresiva de filas de tabla */
+@keyframes row-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.data-table tbody tr { animation: row-fade-in 220ms var(--ease) both; }
+.data-table tbody tr:nth-child(1) { animation-delay: 0ms; }
+.data-table tbody tr:nth-child(2) { animation-delay: 20ms; }
+.data-table tbody tr:nth-child(3) { animation-delay: 40ms; }
+.data-table tbody tr:nth-child(4) { animation-delay: 60ms; }
+.data-table tbody tr:nth-child(5) { animation-delay: 80ms; }
+.data-table tbody tr:nth-child(6) { animation-delay: 100ms; }
+.data-table tbody tr:nth-child(7) { animation-delay: 120ms; }
+.data-table tbody tr:nth-child(8) { animation-delay: 140ms; }
+.data-table tbody tr:nth-child(n+9) { animation-delay: 160ms; }
+
+/* Aparición de tarjetas de stat/persona en cascada */
+.stats-grid .stat-card, .people-grid .person-card { animation: row-fade-in 260ms var(--ease) both; }
+.stats-grid .stat-card:nth-child(1), .people-grid .person-card:nth-child(1) { animation-delay: 0ms; }
+.stats-grid .stat-card:nth-child(2), .people-grid .person-card:nth-child(2) { animation-delay: 30ms; }
+.stats-grid .stat-card:nth-child(3), .people-grid .person-card:nth-child(3) { animation-delay: 60ms; }
+.stats-grid .stat-card:nth-child(4), .people-grid .person-card:nth-child(4) { animation-delay: 90ms; }
+.stats-grid .stat-card:nth-child(5), .people-grid .person-card:nth-child(5) { animation-delay: 120ms; }
+.stats-grid .stat-card:nth-child(6), .people-grid .person-card:nth-child(6) { animation-delay: 150ms; }
+
+/* Ripple sutil al hacer clic en botones (ver App.ui.ripple en ripple.js) */
+.btn { position: relative; overflow: hidden; }
+.btn-ripple {
+  position: absolute; border-radius: 50%; background: rgb(255 255 255 / 0.35);
+  transform: scale(0); pointer-events: none; animation: btn-ripple-out 520ms var(--ease) forwards;
+}
+[class*='btn-secondary'] .btn-ripple, .btn-ghost .btn-ripple { background: rgb(255 255 255 / 0.12); }
+@keyframes btn-ripple-out {
+  to { transform: scale(1); opacity: 0; }
+}
+
+/* Tooltips animados */
+[data-tooltip] { position: relative; }
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%) translateY(4px);
+  background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--border-default);
+  font-size: var(--fs-xs); font-weight: var(--fw-medium); padding: 5px 10px; border-radius: var(--radius-sm);
+  white-space: nowrap; box-shadow: var(--shadow-md); opacity: 0; pointer-events: none;
+  transition: opacity var(--duration-fast) var(--ease), transform var(--duration-fast) var(--ease);
+  z-index: var(--z-dropdown);
+}
+[data-tooltip]:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Skeleton shimmer ya definido en 02-base.css (.skeleton); aquí solo se
+   asegura que respete el radio por defecto cuando no se especifica */
+.skeleton { display: inline-block; }
+
+@media (prefers-reduced-motion: reduce) {
+  .view-enter, .data-table tbody tr, .stats-grid .stat-card, .people-grid .person-card, .btn-ripple {
+    animation: none !important;
+  }
+  .card:hover, .person-card:hover { transform: none; }
+}

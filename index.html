@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TicketFlow | Gestión de Incidencias TI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/01-tokens.css?v=5">
+  <link rel="stylesheet" href="css/02-base.css?v=5">
+  <link rel="stylesheet" href="css/03-layout.css?v=5">
+  <link rel="stylesheet" href="css/04-components.css?v=5">
+  <link rel="stylesheet" href="css/05-pages.css?v=5">
+  <link rel="stylesheet" href="css/06-motion.css?v=5">
+</head>
+<body>
+
+  <!-- ===================== LOGIN ===================== -->
+  <div id="loginScreen"></div>
+
+  <!-- ===================== APP (shell autenticado) ===================== -->
+  <div id="appRoot" hidden>
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <span class="logo-icon">◆</span>
+          <span class="logo-text">TicketFlow</span>
+        </div>
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Colapsar menú">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+      </div>
+      <nav class="sidebar-nav" id="sidebarNav"><!-- generado por shellView.js según el rol --></nav>
+      <div class="sidebar-footer">
+        <a href="#" class="nav-item" id="logoutBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+          <span>Cerrar sesión</span>
+        </a>
+      </div>
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="main-wrapper">
+      <header class="topbar">
+        <button class="menu-btn" id="menuBtn" aria-label="Abrir menú">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+
+        <label class="topbar-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="search" id="globalSearch" placeholder="Buscar incidencias...">
+          <kbd>Ctrl K</kbd>
+        </label>
+
+        <div class="topbar-actions">
+          <button class="icon-btn" id="themeToggle" aria-label="Cambiar tema" data-tooltip="Cambiar tema"></button>
+
+          <div class="dropdown" id="notifDropdown">
+            <button class="icon-btn" id="notifBell" aria-label="Notificaciones">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+              <span class="dot-badge" id="notifDot" hidden></span>
+            </button>
+            <div class="dropdown-panel" id="notifPanel"></div>
+          </div>
+
+          <div class="dropdown" id="userDropdown">
+            <button class="topbar-user" id="userMenuBtn">
+              <span class="avatar" id="topbarAvatar"></span>
+              <span>
+                <div class="topbar-user-name" id="topbarUserName"></div>
+                <div class="topbar-user-role" id="topbarUserRole"></div>
+              </span>
+            </button>
+            <div class="dropdown-panel" id="userMenuPanel"></div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content" id="viewContainer"><!-- vistas renderizadas por router.js --></main>
+    </div>
+  </div>
+
+  <!-- ===================== MODALES (contenido inyectado por modal.js) ===================== -->
+  <div id="modalRoot"></div>
+
+  <!-- ===================== TOASTS ===================== -->
+  <div class="toast-stack" id="toastStack"></div>
+
+  <!-- ===================== SCRIPTS (orden de dependencias) ===================== -->
+  <!-- SDK de Firebase (compat, sin build step) — usado por storageAdapter.js solo si
+       firebaseConfig.js tiene credenciales reales; si no, cae en localStorage. -->
+  <script defer src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+
+  <script defer src="js/core/config.js?v=5"></script>
+  <script defer src="js/core/firebaseConfig.js?v=5"></script>
+  <script defer src="js/core/utils.js?v=5"></script>
+  <script defer src="js/core/eventBus.js?v=5"></script>
+  <script defer src="js/core/theme.js?v=5"></script>
+
+  <script defer src="js/data/storageAdapter.js?v=5"></script>
+  <script defer src="js/data/userRepository.js?v=5"></script>
+  <script defer src="js/data/technicianRepository.js?v=5"></script>
+  <script defer src="js/data/incidentRepository.js?v=5"></script>
+  <script defer src="js/data/notificationRepository.js?v=5"></script>
+  <script defer src="js/data/bootstrap.js?v=5"></script>
+
+  <script defer src="js/services/authService.js?v=5"></script>
+  <script defer src="js/services/incidentService.js?v=5"></script>
+  <script defer src="js/services/technicianService.js?v=5"></script>
+  <script defer src="js/services/notificationService.js?v=5"></script>
+  <script defer src="js/services/statsService.js?v=5"></script>
+
+  <script defer src="js/ui/components/modal.js?v=5"></script>
+  <script defer src="js/ui/components/toast.js?v=5"></script>
+  <script defer src="js/ui/components/dropdown.js?v=5"></script>
+  <script defer src="js/ui/components/charts.js?v=5"></script>
+  <script defer src="js/ui/components/skeleton.js?v=5"></script>
+  <script defer src="js/ui/components/ripple.js?v=5"></script>
+
+  <script defer src="js/ui/router.js?v=5"></script>
+
+  <script defer src="js/ui/views/loginView.js?v=5"></script>
+  <script defer src="js/ui/views/shellView.js?v=5"></script>
+  <script defer src="js/ui/views/dashboardView.js?v=5"></script>
+  <script defer src="js/ui/views/incidentsView.js?v=5"></script>
+  <script defer src="js/ui/views/incidentDetailView.js?v=5"></script>
+  <script defer src="js/ui/views/technicianManagementView.js?v=5"></script>
+  <script defer src="js/ui/views/userManagementView.js?v=5"></script>
+  <script defer src="js/ui/views/profileView.js?v=5"></script>
+  <script defer src="js/ui/views/settingsView.js?v=5"></script>
+
+  <script defer src="js/app.js?v=5"></script>
+</body>
+</html>
