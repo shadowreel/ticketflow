@@ -42,14 +42,14 @@
       username: 'admin',
       name: 'Administrador Principal',
       email: 'admin@ticketflow.com',
-      password: 'Admin123!',
+      password: 'admin',
     },
 
     // Técnicos reales sembrados en el primer arranque (editables/eliminables por el admin)
     initialTechnicians: [
-      { name: 'Leonel', username: 'leonel', email: 'leonel@ticketflow.com', position: 'Técnico de Soporte', password: 'Tecnico123!' },
-      { name: 'Nathan', username: 'nathan', email: 'nathan@ticketflow.com', position: 'Técnico de Redes', password: 'Tecnico123!' },
-      { name: 'Sheyla', username: 'sheyla', email: 'sheyla@ticketflow.com', position: 'Técnica de Software', password: 'Tecnico123!' },
+      { name: 'Leonel', username: 'leonel', email: 'leonel@ticketflow.com', position: 'Técnico de Soporte', password: '123456789' },
+      { name: 'Nathan', username: 'nathan', email: 'nathan@ticketflow.com', position: 'Técnico de Redes', password: '123456789' },
+      { name: 'Sheyla', username: 'sheyla', email: 'sheyla@ticketflow.com', position: 'Técnica de Software', password: '123456789' },
     ],
   };
 

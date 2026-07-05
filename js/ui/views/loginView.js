@@ -190,6 +190,9 @@
             <button type="button" class="auth-tab ${state.tab === 'user' ? 'active' : ''}" data-tab="user">Usuario final</button>
           </div>
           <div id="authPanel"></div>
+          <p class="login-hint">
+            ¿No puedes entrar con ninguna cuenta? <button type="button" id="resetLocalDataBtn" style="color:var(--accent-400);font-weight:600;">Reiniciar datos de prueba</button>
+          </p>
         </div>
       </div>
     `;
@@ -199,6 +202,16 @@
     const panel = container.querySelector('#authPanel');
     if (state.tab === 'staff') renderStaffPanel(panel);
     else renderUserPanel(panel);
+
+    container.querySelector('#resetLocalDataBtn').addEventListener('click', () => {
+      const ok = confirm(
+        'Esto borra todas las incidencias, usuarios y técnicos guardados en este navegador y vuelve a crear las cuentas de ejemplo (admin y los 3 técnicos) con las contraseñas actuales del sistema.\n\n¿Continuar?'
+      );
+      if (!ok) return;
+      localStorage.clear();
+      sessionStorage.clear();
+      location.reload();
+    });
   }
 
   function mount() {
