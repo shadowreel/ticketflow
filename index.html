@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TicketFlow | Gestión de Incidencias TI</title>
+  <title> Gestión de Incidencias TI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/01-tokens.css?v=7">
-  <link rel="stylesheet" href="css/02-base.css?v=7">
-  <link rel="stylesheet" href="css/03-layout.css?v=7">
-  <link rel="stylesheet" href="css/04-components.css?v=7">
-  <link rel="stylesheet" href="css/05-pages.css?v=7">
-  <link rel="stylesheet" href="css/06-motion.css?v=7">
+  <link rel="stylesheet" href="css/01-tokens.css?v=8">
+  <link rel="stylesheet" href="css/02-base.css?v=8">
+  <link rel="stylesheet" href="css/03-layout.css?v=8">
+  <link rel="stylesheet" href="css/04-components.css?v=8">
+  <link rel="stylesheet" href="css/05-pages.css?v=8">
+  <link rel="stylesheet" href="css/06-motion.css?v=8">
 </head>
 <body>
 
@@ -25,8 +25,8 @@
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <div class="logo">
-          <span class="logo-icon">◆</span>
-          <span class="logo-text">TicketFlow</span>
+          <span class="logo-icon">SRI</span>
+          <span class="logo-text">SISTEMA DE REGISTRO DE INCIDENCIAS TI</span>
         </div>
         <button class="sidebar-toggle" id="sidebarToggle" aria-label="Colapsar menú">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
@@ -95,44 +95,44 @@
   <script defer src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 
-  <script defer src="js/core/config.js?v=7"></script>
-  <script defer src="js/core/firebaseConfig.js?v=7"></script>
-  <script defer src="js/core/utils.js?v=7"></script>
-  <script defer src="js/core/eventBus.js?v=7"></script>
-  <script defer src="js/core/theme.js?v=7"></script>
+  <script defer src="js/core/config.js?v=8"></script>
+  <script defer src="js/core/firebaseConfig.js?v=8"></script>
+  <script defer src="js/core/utils.js?v=8"></script>
+  <script defer src="js/core/eventBus.js?v=8"></script>
+  <script defer src="js/core/theme.js?v=8"></script>
 
-  <script defer src="js/data/storageAdapter.js?v=7"></script>
-  <script defer src="js/data/userRepository.js?v=7"></script>
-  <script defer src="js/data/technicianRepository.js?v=7"></script>
-  <script defer src="js/data/incidentRepository.js?v=7"></script>
-  <script defer src="js/data/notificationRepository.js?v=7"></script>
-  <script defer src="js/data/bootstrap.js?v=7"></script>
+  <script defer src="js/data/storageAdapter.js?v=8"></script>
+  <script defer src="js/data/userRepository.js?v=8"></script>
+  <script defer src="js/data/technicianRepository.js?v=8"></script>
+  <script defer src="js/data/incidentRepository.js?v=8"></script>
+  <script defer src="js/data/notificationRepository.js?v=8"></script>
+  <script defer src="js/data/bootstrap.js?v=8"></script>
 
-  <script defer src="js/services/authService.js?v=7"></script>
-  <script defer src="js/services/incidentService.js?v=7"></script>
-  <script defer src="js/services/technicianService.js?v=7"></script>
-  <script defer src="js/services/notificationService.js?v=7"></script>
-  <script defer src="js/services/statsService.js?v=7"></script>
+  <script defer src="js/services/authService.js?v=8"></script>
+  <script defer src="js/services/incidentService.js?v=8"></script>
+  <script defer src="js/services/technicianService.js?v=8"></script>
+  <script defer src="js/services/notificationService.js?v=8"></script>
+  <script defer src="js/services/statsService.js?v=8"></script>
 
-  <script defer src="js/ui/components/modal.js?v=7"></script>
-  <script defer src="js/ui/components/toast.js?v=7"></script>
-  <script defer src="js/ui/components/dropdown.js?v=7"></script>
-  <script defer src="js/ui/components/charts.js?v=7"></script>
-  <script defer src="js/ui/components/skeleton.js?v=7"></script>
-  <script defer src="js/ui/components/ripple.js?v=7"></script>
+  <script defer src="js/ui/components/modal.js?v=8"></script>
+  <script defer src="js/ui/components/toast.js?v=8"></script>
+  <script defer src="js/ui/components/dropdown.js?v=8"></script>
+  <script defer src="js/ui/components/charts.js?v=8"></script>
+  <script defer src="js/ui/components/skeleton.js?v=8"></script>
+  <script defer src="js/ui/components/ripple.js?v=8"></script>
 
-  <script defer src="js/ui/router.js?v=7"></script>
+  <script defer src="js/ui/router.js?v=8"></script>
 
-  <script defer src="js/ui/views/loginView.js?v=7"></script>
-  <script defer src="js/ui/views/shellView.js?v=7"></script>
-  <script defer src="js/ui/views/dashboardView.js?v=7"></script>
-  <script defer src="js/ui/views/incidentsView.js?v=7"></script>
-  <script defer src="js/ui/views/incidentDetailView.js?v=7"></script>
-  <script defer src="js/ui/views/technicianManagementView.js?v=7"></script>
-  <script defer src="js/ui/views/userManagementView.js?v=7"></script>
-  <script defer src="js/ui/views/profileView.js?v=7"></script>
-  <script defer src="js/ui/views/settingsView.js?v=7"></script>
+  <script defer src="js/ui/views/loginView.js?v=8"></script>
+  <script defer src="js/ui/views/shellView.js?v=8"></script>
+  <script defer src="js/ui/views/dashboardView.js?v=8"></script>
+  <script defer src="js/ui/views/incidentsView.js?v=8"></script>
+  <script defer src="js/ui/views/incidentDetailView.js?v=8"></script>
+  <script defer src="js/ui/views/technicianManagementView.js?v=8"></script>
+  <script defer src="js/ui/views/userManagementView.js?v=8"></script>
+  <script defer src="js/ui/views/profileView.js?v=8"></script>
+  <script defer src="js/ui/views/settingsView.js?v=8"></script>
 
-  <script defer src="js/app.js?v=7"></script>
+  <script defer src="js/app.js?v=8"></script>
 </body>
 </html>

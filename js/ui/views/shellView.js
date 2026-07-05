@@ -45,14 +45,14 @@
   };
 
   let currentSession = null;
+  let wired = false; // evita re-adjuntar listeners si mount() se llama más de una vez (logout -> login sin recargar la página)
 
   function updateThemeIcon() {
     const btn = document.getElementById('themeToggle');
     if (btn) btn.innerHTML = App.core.theme.getTheme() === 'dark' ? ICONS.sun : ICONS.moon;
   }
 
-  function initTheme() {
-    updateThemeIcon();
+  function initThemeToggle() {
     document.getElementById('themeToggle').addEventListener('click', () => {
       const next = App.core.theme.getTheme() === 'dark' ? 'light' : 'dark';
       App.core.theme.applyTheme(next);
@@ -201,7 +201,12 @@
     renderUserBadge();
     renderUserMenu();
     await renderNotifPanel();
-    initTheme();
+    updateThemeIcon();
+
+    if (wired) return; // el resto de esta función solo debe correr una vez por carga de página
+    wired = true;
+
+    initThemeToggle();
     wireDropdowns();
     wireSidebarToggles();
     wireGlobalSearch();

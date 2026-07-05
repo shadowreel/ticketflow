@@ -65,8 +65,13 @@
     location.hash = `#${path}`;
   }
 
+  let started = false; // evita agregar hashchange más de una vez si start() se llama en cada login
+
   function start(defaultPath) {
-    window.addEventListener('hashchange', resolve);
+    if (!started) {
+      started = true;
+      window.addEventListener('hashchange', resolve);
+    }
     if (!location.hash && defaultPath) location.hash = `#${defaultPath}`;
     else resolve();
   }

@@ -224,7 +224,8 @@
 
     const modalEl = document.querySelector('.modal-overlay:last-child');
     const fileInput = modalEl.querySelector('#attachmentInput');
-    modalEl.querySelector('#fileDrop').addEventListener('click', (ev) => { ev.preventDefault(); fileInput.click(); });
+    // #fileDrop es un <label> que envuelve este <input>: el navegador ya abre el
+    // selector de archivos al hacer clic en cualquier parte de la etiqueta, sin JS.
     fileInput.addEventListener('change', async () => {
       const file = fileInput.files[0];
       if (!file) return;
