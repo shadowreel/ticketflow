@@ -111,11 +111,33 @@
 
   function byNewestFirst(a, b) { return (b.createdAt || 0) - (a.createdAt || 0); }
 
+  const EYE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>';
+  const EYE_OFF_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.94 10.94 0 0112 19c-7 0-11-7-11-7a21.8 21.8 0 015.06-6.06M9.9 4.24A10.94 10.94 0 0112 4c7 0 11 7 11 7a21.8 21.8 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><path d="M1 1l22 22"/></svg>';
+
+  /** Botón de "mostrar/ocultar contraseña" (mismo estilo que los demás controles) para insertar junto a un input de contraseña. */
+  function passwordToggleHtml(targetId) {
+    return `<button type="button" class="password-toggle-btn" data-password-toggle="${targetId}" aria-label="Mostrar contraseña">${EYE_ICON}</button>`;
+  }
+
+  /** Activa todos los botones de mostrar/ocultar contraseña dentro de root (o todo el documento). */
+  function wirePasswordToggles(root) {
+    (root || document).querySelectorAll('[data-password-toggle]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const input = document.getElementById(btn.dataset.passwordToggle);
+        if (!input) return;
+        const willShow = input.type === 'password';
+        input.type = willShow ? 'text' : 'password';
+        btn.innerHTML = willShow ? EYE_OFF_ICON : EYE_ICON;
+        btn.setAttribute('aria-label', willShow ? 'Ocultar contraseña' : 'Mostrar contraseña');
+      });
+    });
+  }
+
   App.core = App.core || {};
   App.core.utils = {
     escapeHtml, uuid, slug, debounce, formatDate, formatRelativeTime,
     formatMinutes, initials, hashPassword, compressImage, statusSlug, byNewestFirst,
-    generateTempPassword,
+    generateTempPassword, passwordToggleHtml, wirePasswordToggles,
   };
 
 })(window.App = window.App || {});

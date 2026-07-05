@@ -5,7 +5,7 @@
   'use strict';
 
   const auth = App.services.authService;
-  const { escapeHtml } = App.core.utils;
+  const { escapeHtml, passwordToggleHtml, wirePasswordToggles } = App.core.utils;
   const bus = App.core.eventBus;
 
   const root = () => document.getElementById('loginScreen');
@@ -40,7 +40,10 @@
         </div>
         <div class="form-group">
           <label for="staffPassword">Contraseña</label>
-          <input type="password" id="staffPassword" class="input" placeholder="Tu contraseña" required>
+          <div class="password-field">
+            <input type="password" id="staffPassword" class="input" placeholder="Tu contraseña" required>
+            ${passwordToggleHtml('staffPassword')}
+          </div>
         </div>
         <button type="submit" class="btn btn-primary btn-block" ${state.loading ? 'disabled' : ''}>
           ${state.loading ? '<span class="spinner"></span>' : 'Ingresar'}
@@ -48,6 +51,7 @@
       </form>
       <p class="login-hint">El administrador crea y gestiona las cuentas de los técnicos desde el panel de Técnicos.</p>
     `;
+    wirePasswordToggles(container);
 
     container.querySelector('#staffLoginForm').addEventListener('submit', async (ev) => {
       ev.preventDefault();
@@ -74,7 +78,10 @@
           </div>
           <div class="form-group">
             <label for="userPassword">Contraseña</label>
-            <input type="password" id="userPassword" class="input" placeholder="Tu contraseña" required>
+            <div class="password-field">
+              <input type="password" id="userPassword" class="input" placeholder="Tu contraseña" required>
+              ${passwordToggleHtml('userPassword')}
+            </div>
           </div>
           <button type="submit" class="btn btn-primary btn-block" ${state.loading ? 'disabled' : ''}>
             ${state.loading ? '<span class="spinner"></span>' : 'Iniciar sesión'}
@@ -82,6 +89,7 @@
         </form>
         <div class="login-switch">¿No tienes cuenta? <button type="button" id="toRegister">Regístrate</button></div>
       `;
+      wirePasswordToggles(container);
       container.querySelector('#userLoginForm').addEventListener('submit', async (ev) => {
         ev.preventDefault();
         const email = container.querySelector('#userEmail').value.trim();
@@ -109,7 +117,10 @@
           </div>
           <div class="form-group">
             <label for="regPassword">Contraseña</label>
-            <input type="password" id="regPassword" class="input" placeholder="Mínimo 6 caracteres" minlength="6" required>
+            <div class="password-field">
+              <input type="password" id="regPassword" class="input" placeholder="Mínimo 6 caracteres" minlength="6" required>
+              ${passwordToggleHtml('regPassword')}
+            </div>
           </div>
           <button type="submit" class="btn btn-primary btn-block" ${state.loading ? 'disabled' : ''}>
             ${state.loading ? '<span class="spinner"></span>' : 'Crear cuenta'}
@@ -117,6 +128,7 @@
         </form>
         <div class="login-switch">¿Ya tienes cuenta? <button type="button" id="toLogin">Inicia sesión</button></div>
       `;
+      wirePasswordToggles(container);
       container.querySelector('#userRegisterForm').addEventListener('submit', async (ev) => {
         ev.preventDefault();
         const name = container.querySelector('#regName').value.trim();
@@ -153,16 +165,23 @@
           </p>
           <div class="form-group">
             <label for="newPass1">Nueva contraseña</label>
-            <input type="password" id="newPass1" class="input" minlength="6" required>
+            <div class="password-field">
+              <input type="password" id="newPass1" class="input" minlength="6" required>
+              ${passwordToggleHtml('newPass1')}
+            </div>
           </div>
           <div class="form-group">
             <label for="newPass2">Confirmar contraseña</label>
-            <input type="password" id="newPass2" class="input" minlength="6" required>
+            <div class="password-field">
+              <input type="password" id="newPass2" class="input" minlength="6" required>
+              ${passwordToggleHtml('newPass2')}
+            </div>
           </div>
           <div id="forcedPassError" class="form-alert" hidden></div>
           <button type="button" id="forcedPassSubmit" class="btn btn-primary btn-block">Guardar y continuar</button>
         `,
       });
+      wirePasswordToggles(document.getElementById('modalRoot'));
       document.getElementById('forcedPassSubmit').addEventListener('click', async () => {
         const p1 = document.getElementById('newPass1').value;
         const p2 = document.getElementById('newPass2').value;

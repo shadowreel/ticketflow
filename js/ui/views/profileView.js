@@ -5,7 +5,7 @@
   'use strict';
 
   const auth = App.services.authService;
-  const { escapeHtml, initials, compressImage } = App.core.utils;
+  const { escapeHtml, initials, compressImage, passwordToggleHtml, wirePasswordToggles } = App.core.utils;
   const { maxAttachmentDimension, attachmentQuality, roles } = App.config;
 
   function repoForRole(role) {
@@ -63,15 +63,24 @@
             <form id="passwordForm">
               <div class="form-group">
                 <label for="curPass">Contraseña actual</label>
-                <input type="password" id="curPass" class="input" required>
+                <div class="password-field">
+                  <input type="password" id="curPass" class="input" required>
+                  ${passwordToggleHtml('curPass')}
+                </div>
               </div>
               <div class="form-group">
                 <label for="newPass">Nueva contraseña</label>
-                <input type="password" id="newPass" class="input" minlength="6" required>
+                <div class="password-field">
+                  <input type="password" id="newPass" class="input" minlength="6" required>
+                  ${passwordToggleHtml('newPass')}
+                </div>
               </div>
               <div class="form-group">
                 <label for="newPass2">Confirmar nueva contraseña</label>
-                <input type="password" id="newPass2" class="input" minlength="6" required>
+                <div class="password-field">
+                  <input type="password" id="newPass2" class="input" minlength="6" required>
+                  ${passwordToggleHtml('newPass2')}
+                </div>
               </div>
               <button type="submit" class="btn btn-secondary btn-block">Actualizar contraseña</button>
             </form>
@@ -79,6 +88,7 @@
         </div>
       </div>
     `;
+    wirePasswordToggles(container);
 
     document.getElementById('changePhotoBtn').addEventListener('click', () => document.getElementById('avatarInput').click());
     document.getElementById('avatarInput').addEventListener('change', async (ev) => {

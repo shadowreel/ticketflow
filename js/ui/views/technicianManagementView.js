@@ -7,7 +7,7 @@
   'use strict';
 
   const technicianService = App.services.technicianService;
-  const { escapeHtml, initials, compressImage } = App.core.utils;
+  const { escapeHtml, initials, compressImage, passwordToggleHtml, wirePasswordToggles } = App.core.utils;
   const { maxAttachmentDimension, attachmentQuality } = App.config;
 
   const EDIT_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>';
@@ -117,7 +117,7 @@
             : `<div class="form-group"><label for="techUsername">Usuario (para iniciar sesión)</label><input type="text" id="techUsername" class="input" placeholder="ej. jperez" pattern="[a-z0-9._-]{3,20}" autocapitalize="off" autocorrect="off" required></div>`}
           <div class="form-group"><label for="techEmail">Correo</label><input type="email" id="techEmail" class="input" value="${existing ? escapeHtml(existing.email) : ''}" required></div>
           <div class="form-group"><label for="techPosition">Cargo</label><input type="text" id="techPosition" class="input" value="${existing ? escapeHtml(existing.position || '') : ''}" placeholder="Ej. Técnico de Redes" required></div>
-          ${!existing ? `<div class="form-group"><label for="techPassword">Contraseña inicial</label><input type="password" id="techPassword" class="input" minlength="6" required></div>` : ''}
+          ${!existing ? `<div class="form-group"><label for="techPassword">Contraseña inicial</label><div class="password-field"><input type="password" id="techPassword" class="input" minlength="6" required>${passwordToggleHtml('techPassword')}</div></div>` : ''}
         </form>
       `,
       footerHtml: `
@@ -126,6 +126,7 @@
       `,
     });
     const modalEl = document.querySelector('.modal-overlay:last-child');
+    wirePasswordToggles(modalEl);
 
     modalEl.querySelector('#techPhotoBtn').addEventListener('click', () => modalEl.querySelector('#techPhotoInput').click());
     modalEl.querySelector('#techPhotoInput').addEventListener('change', async (ev) => {
