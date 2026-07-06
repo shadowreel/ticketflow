@@ -201,7 +201,7 @@
     container.innerHTML = `
       <div class="login-screen">
         <div class="login-card">
-          <div class="login-logo"><span class="logo-icon">◆</span><span>TicketFlow</span></div>
+          <div class="login-logo"><span class="logo-icon">◆</span><span>SISTEMA DE REGISTRO DE INCIDENTES TI</span></div>
           <h1>Bienvenido</h1>
           <p class="login-subtitle">Sistema de gestión de incidencias TI</p>
           <div class="auth-tabs">
