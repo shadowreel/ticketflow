@@ -21,8 +21,10 @@
   padding: var(--space-7);
   backdrop-filter: blur(20px);
 }
-.login-logo { display: flex; align-items: center; gap: var(--space-2); justify-content: center; margin-bottom: var(--space-5); font-size: var(--fs-lg); font-weight: var(--fw-bold); }
-.login-card h1 { text-align: center; font-size: var(--fs-xl); }
+.login-logo { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-2); margin-bottom: var(--space-5); font-size: var(--fs-lg); font-weight: var(--fw-bold); text-align: center; }
+.login-logo .logo-icon { width: 44px; height: 44px; min-width: 44px; }
+.login-logo .logo-icon svg { width: 22px; height: 22px; }
+.login-card h1 { text-align: center; font-size: var(--fs-xl); margin-bottom: var(--space-6); }
 .login-subtitle { text-align: center; color: var(--text-secondary); font-size: var(--fs-sm); margin-top: var(--space-2); margin-bottom: var(--space-6); }
 
 .auth-tabs { display: flex; gap: 4px; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 3px; margin-bottom: var(--space-6); }

@@ -201,9 +201,16 @@
     container.innerHTML = `
       <div class="login-screen">
         <div class="login-card">
-          <div class="login-logo"><span class="logo-icon">◆</span><span>SISTEMA DE REGISTRO DE INCIDENTES TI</span></div>
+          <div class="login-logo">
+            <span class="logo-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="12" rx="2"/>
+                <path d="M8 20h8M12 16v4"/>
+              </svg>
+            </span>
+            <span>SISTEMA DE REGISTRO DE INCIDENTES TI</span>
+          </div>
           <h1>Bienvenido</h1>
-          <p class="login-subtitle">Sistema de gestión de incidencias TI</p>
           <div class="auth-tabs">
             <button type="button" class="auth-tab ${state.tab === 'staff' ? 'active' : ''}" data-tab="staff">Personal TI</button>
             <button type="button" class="auth-tab ${state.tab === 'user' ? 'active' : ''}" data-tab="user">Usuario final</button>
