@@ -65,7 +65,7 @@
             <p style="font-size:var(--fs-sm);color:var(--text-secondary);line-height:1.6;">${escapeHtml(incident.description) || '<span class="text-tertiary">Sin descripción.</span>'}</p>
             ${incident.attachments.length ? `
               <div class="attachment-list" style="margin-top:16px;">
-                ${incident.attachments.map((a) => `<a href="${a}" target="_blank" class="attachment-thumb" style="width:96px;height:96px;"><img src="${a}" alt=""></a>`).join('')}
+                ${incident.attachments.map((a, i) => `<button type="button" class="attachment-thumb" data-view-attachment="${i}" style="width:96px;height:96px;"><img src="${a}" alt="Adjunto ${i + 1}"></button>`).join('')}
               </div>` : ''}
           </div>
 
@@ -174,6 +174,16 @@
   }
 
   function wireActions(container, incident, session) {
+    container.querySelectorAll('[data-view-attachment]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const src = incident.attachments[Number(btn.dataset.viewAttachment)];
+        App.ui.modal.open({
+          title: 'Adjunto de la incidencia',
+          bodyHtml: `<img src="${src}" alt="" style="width:100%;border-radius:var(--radius-md);display:block;">`,
+        });
+      });
+    });
+
     container.querySelector('#commentForm').addEventListener('submit', async (ev) => {
       ev.preventDefault();
       const text = container.querySelector('#commentText').value.trim();
