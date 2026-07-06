@@ -25,16 +25,20 @@
   padding: var(--space-5) var(--space-5) var(--space-4);
 }
 
-.logo { display: flex; align-items: center; gap: var(--space-2); font-weight: var(--fw-semibold); font-size: var(--fs-md); }
+.logo { display: flex; align-items: center; gap: var(--space-2); font-weight: var(--fw-semibold); font-size: var(--fs-md); min-width: 0; flex: 1; overflow: hidden; }
 .logo-icon {
-  width: 28px; height: 28px; display: grid; place-items: center;
+  min-width: 28px; height: 28px; display: grid; place-items: center;
   background: linear-gradient(135deg, var(--accent-400), var(--accent-600));
-  color: #fff; border-radius: var(--radius-md); font-size: 14px; flex: none;
+  color: #fff; border-radius: var(--radius-md); font-size: 12px; font-weight: var(--fw-bold);
+  flex: none; padding: 0 6px; letter-spacing: -0.02em;
+}
+.logo-text {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
 }
 
 .sidebar-toggle {
   display: grid; place-items: center; width: 28px; height: 28px;
-  border-radius: var(--radius-sm); color: var(--text-tertiary);
+  border-radius: var(--radius-sm); color: var(--text-tertiary); flex: none;
 }
 .sidebar-toggle:hover { background: var(--bg-hover); color: var(--text-primary); }
 
