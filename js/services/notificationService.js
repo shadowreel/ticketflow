@@ -37,9 +37,9 @@
     return record;
   }
 
-  async function getAdminId() {
-    const [admin] = await App.data.storageAdapter.getAll('admin');
-    return admin ? admin.id : null;
+  async function getAdminIds() {
+    const admins = await App.data.adminRepository.getAll();
+    return admins.map((a) => a.id);
   }
 
   function lastActor(incident) {
@@ -56,12 +56,14 @@
     const T = App.config.notificationTypes;
 
     bus.on('incident:created', async (incident) => {
-      const adminId = await getAdminId();
-      if (adminId) await notify({
-        recipientId: adminId, type: T.INCIDENT_CREATED,
-        title: 'Nueva incidencia reportada', message: `${incident.folio} · ${incident.title}`,
-        relatedIncidentId: incident.id,
-      });
+      const adminIds = await getAdminIds();
+      for (const adminId of adminIds) {
+        await notify({
+          recipientId: adminId, type: T.INCIDENT_CREATED,
+          title: 'Nueva incidencia reportada', message: `${incident.folio} · ${incident.title}`,
+          relatedIncidentId: incident.id,
+        });
+      }
     });
 
     bus.on('incident:assigned', async ({ incident }) => {
@@ -103,12 +105,14 @@
     });
 
     bus.on('incident:resolved', async (incident) => {
-      const adminId = await getAdminId();
-      if (adminId) await notify({
-        recipientId: adminId, type: T.INCIDENT_RESOLVED,
-        title: 'Incidencia resuelta', message: `${incident.folio} · ${incident.title}`,
-        relatedIncidentId: incident.id,
-      });
+      const adminIds = await getAdminIds();
+      for (const adminId of adminIds) {
+        await notify({
+          recipientId: adminId, type: T.INCIDENT_RESOLVED,
+          title: 'Incidencia resuelta', message: `${incident.folio} · ${incident.title}`,
+          relatedIncidentId: incident.id,
+        });
+      }
       await notify({
         recipientId: incident.reportedBy.id, type: T.INCIDENT_RESOLVED,
         title: 'Tu incidencia fue resuelta', message: `${incident.folio} · ${incident.title}`,
@@ -118,12 +122,15 @@
 
     bus.on('incident:comment', async ({ incident, comment }) => {
       if (comment.internal) {
-        const adminId = await getAdminId();
-        if (adminId && adminId !== comment.authorId) await notify({
-          recipientId: adminId, type: T.INCIDENT_COMMENT,
-          title: 'Nuevo comentario interno', message: `${incident.folio}: ${comment.text}`,
-          relatedIncidentId: incident.id,
-        });
+        const adminIds = await getAdminIds();
+        for (const adminId of adminIds) {
+          if (adminId === comment.authorId) continue;
+          await notify({
+            recipientId: adminId, type: T.INCIDENT_COMMENT,
+            title: 'Nuevo comentario interno', message: `${incident.folio}: ${comment.text}`,
+            relatedIncidentId: incident.id,
+          });
+        }
         return;
       }
       const recipients = new Set();

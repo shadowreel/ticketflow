@@ -12,7 +12,7 @@
   const SESSION_KEY = 'ticketflow:session';
   const { hashPassword } = App.core.utils;
   const { roles } = App.config;
-  const adminStorage = App.data.storageAdapter;
+  const adminRepo = App.data.adminRepository;
   const technicianRepo = App.data.technicianRepository;
   const userRepo = App.data.userRepository;
 
@@ -51,8 +51,8 @@
     const target = String(username).trim().toLowerCase();
     const passwordHash = await hashPassword(password);
 
-    const [admin] = await adminStorage.getAll('admin');
-    if (admin && admin.username.toLowerCase() === target) {
+    const admin = await adminRepo.getByUsername(target);
+    if (admin) {
       if (admin.passwordHash !== passwordHash) throw new Error('Contraseña incorrecta.');
       const session = toSessionFromAdmin(admin);
       writeSession(session);
@@ -91,7 +91,7 @@
   async function getCurrentRecord() {
     const session = readSession();
     if (!session) return null;
-    if (session.role === roles.ADMIN) return (await adminStorage.getAll('admin'))[0];
+    if (session.role === roles.ADMIN) return adminRepo.getById(session.id);
     if (session.role === roles.TECHNICIAN) return technicianRepo.getById(session.id);
     return userRepo.getById(session.id);
   }
@@ -108,7 +108,7 @@
     if (!session) throw new Error('No hay sesión activa.');
     const passwordHash = await hashPassword(newPassword);
     if (session.role === roles.ADMIN) {
-      await adminStorage.update('admin', session.id, { passwordHash, mustChangePassword: false });
+      await adminRepo.update(session.id, { passwordHash, mustChangePassword: false });
     } else if (session.role === roles.TECHNICIAN) {
       await technicianRepo.update(session.id, { passwordHash, mustChangePassword: false });
     } else {

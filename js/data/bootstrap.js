@@ -11,10 +11,10 @@
   const { defaultAdmin, initialTechnicians, defaultCategories, defaultSla } = App.config;
 
   async function ensureAdmin() {
-    const existing = await storage.getAll('admin');
+    const existing = await App.data.adminRepository.getAll();
     if (existing.length) return;
     const passwordHash = await hashPassword(defaultAdmin.password);
-    await storage.replaceAll('admin', [{
+    await App.data.adminRepository.create({
       id: 'admin',
       username: defaultAdmin.username,
       name: defaultAdmin.name,
@@ -22,8 +22,7 @@
       passwordHash,
       mustChangePassword: true,
       avatar: null,
-      createdAt: Date.now(),
-    }]);
+    });
   }
 
   async function ensureTechnicians() {

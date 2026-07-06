@@ -97,6 +97,24 @@
 .person-card .status-dot { position: absolute; top: var(--space-4); right: var(--space-4); width: 10px; height: 10px; border-radius: 50%; background: var(--success-500); }
 .person-card.inactive .status-dot { background: var(--text-tertiary); }
 .person-card.inactive { opacity: 0.6; }
+.person-card .badge-self {
+  position: absolute; top: var(--space-4); right: var(--space-4);
+  font-size: 11px; font-weight: var(--fw-semibold); color: #fff;
+  background: var(--accent-500); border-radius: var(--radius-full); padding: 2px 9px;
+}
+.person-card .person-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.view-tabs {
+  display: inline-flex; gap: 4px; background: var(--bg-elevated);
+  border: 1px solid var(--border-default); border-radius: var(--radius-md);
+  padding: 3px; margin-bottom: var(--space-5);
+}
+.view-tab {
+  padding: 7px 16px; border-radius: var(--radius-sm);
+  font-size: var(--fs-sm); font-weight: var(--fw-medium); color: var(--text-secondary);
+  transition: background var(--duration-fast) var(--ease), color var(--duration-fast) var(--ease);
+}
+.view-tab.active { background: var(--accent-500); color: #fff; }
 
 /* ---------- Incident detail ---------- */
 .detail-meta-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4); margin-bottom: var(--space-5); }

@@ -9,7 +9,7 @@
   const { maxAttachmentDimension, attachmentQuality, roles } = App.config;
 
   function repoForRole(role) {
-    if (role === roles.ADMIN) return { get: async () => (await App.data.storageAdapter.getAll('admin'))[0], update: (id, patch) => App.data.storageAdapter.update('admin', id, patch) };
+    if (role === roles.ADMIN) return { get: (id) => App.data.adminRepository.getById(id), update: (id, patch) => App.data.adminRepository.update(id, patch) };
     if (role === roles.TECHNICIAN) return { get: (id) => App.data.technicianRepository.getById(id), update: (id, patch) => App.data.technicianRepository.update(id, patch) };
     return { get: (id) => App.data.userRepository.getById(id), update: (id, patch) => App.data.userRepository.update(id, patch) };
   }
