@@ -1,5 +1,5 @@
-# Credenciales reales de Firebase (usa firebaseConfig.example.js como plantilla)
-js/core/firebaseConfig.js
+# Credenciales reales de Supabase (usa supabaseConfig.example.js como plantilla)
+js/core/supabaseConfig.js
 
 # Prototipo de la Fase 1 anterior, conservado solo como referencia local
 legacy/

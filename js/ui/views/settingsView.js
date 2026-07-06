@@ -47,12 +47,12 @@
         <h3>Estado de sincronización</h3>
         <p>
           <span class="pill ${collaborative ? 'tone-neutral' : 'tone-neutral'}" style="${collaborative ? 'color:var(--success-500);background:color-mix(in srgb, var(--success-500) 15%, transparent);' : ''}">
-            ${collaborative ? '● Colaborativo (Firebase)' : '● Local (solo este navegador)'}
+            ${collaborative ? '● Colaborativo (Supabase)' : '● Local (solo este navegador)'}
           </span>
         </p>
         <p>${collaborative
-          ? 'Los datos se sincronizan en tiempo real entre todas las computadoras conectadas a este mismo proyecto de Firebase.'
-          : 'No hay credenciales de Firebase configuradas en js/core/firebaseConfig.js — los datos solo viven en este navegador. Completa ese archivo para habilitar la colaboración entre varias computadoras.'}</p>
+          ? 'Los datos se sincronizan en tiempo real entre todas las computadoras conectadas a este mismo proyecto de Supabase.'
+          : 'No hay credenciales de Supabase configuradas en js/core/supabaseConfig.js — los datos solo viven en este navegador. Completa ese archivo para habilitar la colaboración entre varias computadoras.'}</p>
       </div>
 
       <div class="card card-pad settings-section">

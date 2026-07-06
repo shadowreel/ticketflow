@@ -6,10 +6,11 @@
    remove/replaceAll/getSetting/setSetting/nextSequence/exportAll/
    importAll) sin importar el motor real:
 
-   - Si js/core/firebaseConfig.js tiene credenciales reales,
-     usa Firebase Firestore (colaborativo, tiempo real, varias
-     computadoras viendo los mismos datos).
-   - Si no hay credenciales (o Firebase falla al iniciar), cae
+   - Si js/core/supabaseConfig.js tiene credenciales reales,
+     usa Supabase (Postgres + tiempo real, colaborativo: varias
+     computadoras viendo los mismos datos). Ver supabase/schema.sql
+     para la tabla y función que la app necesita.
+   - Si no hay credenciales (o Supabase falla al iniciar), cae
      en silencio a localStorage — el mismo comportamiento de la
      Fase 1, para que la app nunca se quede sin funcionar.
 
@@ -21,9 +22,7 @@
 
   const PREFIX = App.config.storagePrefix;
   const bus = App.core.eventBus;
-  const fbConfig = App.config.firebase || {};
-
-  const WATCHED_COLLECTIONS = ['admin', 'technicians', 'users', 'incidents', 'notifications'];
+  const sbConfig = App.config.supabase || {};
 
   /* ---------------------------------------------------------
      Motor local (localStorage) — idéntico a la Fase 1
@@ -125,87 +124,96 @@
   };
 
   /* ---------------------------------------------------------
-     Motor Firestore — colaborativo, se activa solo con config real
+     Motor Supabase — colaborativo, se activa solo con config real
      --------------------------------------------------------- */
-  const firestoreConfigured = !!(fbConfig.apiKey && fbConfig.projectId && fbConfig.apiKey !== 'TU_API_KEY');
-  let db = null;
+  const TABLE = 'ticketflow_data';
+  const META_SETTINGS_ID = '00000000-0000-0000-0000-000000000002';
+  const META_COUNTERS_ID = '00000000-0000-0000-0000-000000000001';
 
-  if (firestoreConfigured) {
+  const supabaseConfigured = !!(sbConfig.url && sbConfig.anonKey
+    && sbConfig.url !== 'https://TU_PROYECTO.supabase.co' && sbConfig.anonKey !== 'TU_ANON_KEY');
+  let sb = null;
+
+  if (supabaseConfigured) {
     try {
-      firebase.initializeApp(fbConfig);
-      db = firebase.firestore();
+      sb = window.supabase.createClient(sbConfig.url, sbConfig.anonKey);
     } catch (err) {
-      console.error('[storageAdapter] No se pudo inicializar Firebase, usando almacenamiento local.', err);
-      db = null;
+      console.error('[storageAdapter] No se pudo inicializar Supabase, usando almacenamiento local.', err);
+      sb = null;
     }
   }
 
-  const META_DOC = { settings: db && db.collection('meta').doc('settings'), counters: db && db.collection('meta').doc('counters') };
+  function metaRowId(collection) {
+    if (collection === 'settings') return META_SETTINGS_ID;
+    if (collection === 'counters') return META_COUNTERS_ID;
+    return null;
+  }
 
-  const firestoreEngine = db ? {
+  const supabaseEngine = sb ? {
     async getAll(collection) {
-      const snap = await db.collection(collection).get();
-      return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const { data, error } = await sb.from(TABLE).select('record').eq('collection', collection);
+      if (error) throw error;
+      return data.map((row) => row.record);
     },
     async getById(collection, id) {
-      const doc = await db.collection(collection).doc(id).get();
-      return doc.exists ? { id: doc.id, ...doc.data() } : null;
+      const { data, error } = await sb.from(TABLE).select('record').eq('collection', collection).eq('id', id).maybeSingle();
+      if (error) throw error;
+      return data ? data.record : null;
     },
     async insert(collection, item) {
       const id = item.id || App.core.utils.uuid();
       const record = { ...item, id };
-      await db.collection(collection).doc(id).set(record);
+      const { error } = await sb.from(TABLE).insert({ id, collection, record });
+      if (error) throw error;
       notifyChange(collection);
       return record;
     },
     async update(collection, id, patch) {
-      await db.collection(collection).doc(id).set(patch, { merge: true });
+      const current = await supabaseEngine.getById(collection, id);
+      if (!current) return null;
+      const merged = { ...current, ...patch };
+      const { error } = await sb.from(TABLE).update({ record: merged, updated_at: new Date().toISOString() }).eq('collection', collection).eq('id', id);
+      if (error) throw error;
       notifyChange(collection);
-      return firestoreEngine.getById(collection, id);
+      return merged;
     },
     async remove(collection, id) {
-      await db.collection(collection).doc(id).delete();
+      const { error } = await sb.from(TABLE).delete().eq('collection', collection).eq('id', id);
+      if (error) throw error;
       notifyChange(collection);
       return true;
     },
     async replaceAll(collection, items) {
-      const batch = db.batch();
-      const existing = await db.collection(collection).get();
-      existing.docs.forEach((d) => batch.delete(d.ref));
-      items.forEach((item) => {
-        const id = item.id || App.core.utils.uuid();
-        batch.set(db.collection(collection).doc(id), { ...item, id });
-      });
-      await batch.commit();
+      const { error: delErr } = await sb.from(TABLE).delete().eq('collection', collection);
+      if (delErr) throw delErr;
+      if (items.length) {
+        const rows = items.map((item) => ({ id: item.id || App.core.utils.uuid(), collection, record: item }));
+        const { error } = await sb.from(TABLE).insert(rows);
+        if (error) throw error;
+      }
       notifyChange(collection);
     },
     async getSetting(k, defaultValue) {
-      const doc = await META_DOC.settings.get();
-      const all = doc.exists ? doc.data() : {};
+      const all = (await supabaseEngine.getById('meta', META_SETTINGS_ID)) || {};
       return Object.prototype.hasOwnProperty.call(all, k) ? all[k] : defaultValue;
     },
     async setSetting(k, value) {
-      await META_DOC.settings.set({ [k]: value }, { merge: true });
+      const current = (await supabaseEngine.getById('meta', META_SETTINGS_ID)) || {};
+      const merged = { ...current, [k]: value };
+      const { error } = await sb.from(TABLE).upsert({ id: META_SETTINGS_ID, collection: 'meta', record: merged, updated_at: new Date().toISOString() });
+      if (error) throw error;
       notifyChange('settings');
     },
     async nextSequence(name) {
-      return db.runTransaction(async (tx) => {
-        const doc = await tx.get(META_DOC.counters);
-        const counters = doc.exists ? doc.data() : {};
-        const next = (counters[name] || 0) + 1;
-        tx.set(META_DOC.counters, { [name]: next }, { merge: true });
-        return next;
-      });
+      const { data, error } = await sb.rpc('ticketflow_next_sequence', { seq_name: name });
+      if (error) throw error;
+      return data;
     },
     async exportAll() {
       const data = {};
       for (const c of BACKUP_COLLECTIONS) {
-        if (c === 'settings' || c === 'counters') {
-          const doc = await META_DOC[c].get();
-          data[c] = doc.exists ? doc.data() : {};
-        } else {
-          data[c] = await firestoreEngine.getAll(c);
-        }
+        const metaId = metaRowId(c);
+        data[c] = metaId ? ((await supabaseEngine.getById('meta', metaId)) || {}) : await supabaseEngine.getAll(c);
       }
       return { exportedAt: Date.now(), data };
     },
@@ -213,30 +221,40 @@
       const data = (backup && backup.data) || {};
       for (const c of BACKUP_COLLECTIONS) {
         if (data[c] === undefined) continue;
-        if (c === 'settings' || c === 'counters') await META_DOC[c].set(data[c]);
-        else await firestoreEngine.replaceAll(c, data[c]);
+        const metaId = metaRowId(c);
+        if (metaId) {
+          const { error } = await sb.from(TABLE).upsert({ id: metaId, collection: 'meta', record: data[c], updated_at: new Date().toISOString() });
+          if (error) throw error;
+          notifyChange(c);
+        } else {
+          await supabaseEngine.replaceAll(c, data[c]);
+        }
       }
     },
   } : null;
 
-  // Listeners en tiempo real: cualquier escritura (propia o de otra computadora)
-  // vuelve a emitir el mismo 'data:changed' que ya escucha el resto de la app.
-  if (firestoreEngine) {
-    WATCHED_COLLECTIONS.forEach((collection) => {
-      db.collection(collection).onSnapshot(
-        () => bus.emit('data:changed', { collection, remote: true }),
-        (err) => console.error(`[storageAdapter] listener de "${collection}" falló`, err),
-      );
-    });
-    db.collection('meta').onSnapshot(
-      (snap) => snap.docChanges().forEach((change) => bus.emit('data:changed', { collection: change.doc.id, remote: true })),
-      (err) => console.error('[storageAdapter] listener de "meta" falló', err),
-    );
+  // Tiempo real: cualquier escritura (propia o de otra computadora) vuelve a
+  // emitir el mismo 'data:changed' que ya escucha el resto de la app.
+  if (supabaseEngine) {
+    sb.channel('ticketflow-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, (payload) => {
+        const row = (payload.new && Object.keys(payload.new).length) ? payload.new : payload.old;
+        if (!row) return;
+        let collection = row.collection;
+        if (collection === 'meta') {
+          if (row.id === META_SETTINGS_ID) collection = 'settings';
+          else if (row.id === META_COUNTERS_ID) collection = 'counters';
+        }
+        bus.emit('data:changed', { collection, remote: true });
+      })
+      .subscribe((status, err) => {
+        if (err) console.error('[storageAdapter] error en el canal de tiempo real de Supabase', err);
+      });
   }
 
-  const engine = firestoreEngine || localEngine;
-  if (!firestoreEngine && firestoreConfigured) {
-    console.warn('[storageAdapter] Firebase configurado pero no disponible; usando almacenamiento local.');
+  const engine = supabaseEngine || localEngine;
+  if (!supabaseEngine && supabaseConfigured) {
+    console.warn('[storageAdapter] Supabase configurado pero no disponible; usando almacenamiento local.');
   }
 
   App.data = App.data || {};
@@ -252,7 +270,7 @@
     nextSequence: engine.nextSequence,
     exportAll: engine.exportAll,
     importAll: engine.importAll,
-    isCollaborative: () => !!firestoreEngine,
+    isCollaborative: () => !!supabaseEngine,
   };
 
 })(window.App = window.App || {});
