@@ -36,7 +36,7 @@
       <form id="staffLoginForm">
         <div class="form-group">
           <label for="staffUsername">Usuario</label>
-          <input type="text" id="staffUsername" class="input" placeholder="Ej. admin o leonel" required autofocus autocapitalize="off" autocorrect="off">
+          <input type="text" id="staffUsername" class="input" placeholder="Usuario" required autofocus autocapitalize="off" autocorrect="off">
         </div>
         <div class="form-group">
           <label for="staffPassword">Contraseña</label>
