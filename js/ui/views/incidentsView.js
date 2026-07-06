@@ -224,32 +224,53 @@
 
     const modalEl = document.querySelector('.modal-overlay:last-child');
     const fileInput = modalEl.querySelector('#attachmentInput');
+    const submitBtn = modalEl.querySelector('#createIncidentSubmit');
+    let pendingUpload = null; // Promise de la compresión en curso, o null si no hay ninguna
+
     // #fileDrop es un <label> que envuelve este <input>: el navegador ya abre el
     // selector de archivos al hacer clic en cualquier parte de la etiqueta, sin JS.
-    fileInput.addEventListener('change', async () => {
+    fileInput.addEventListener('change', () => {
       const file = fileInput.files[0];
       if (!file) return;
       if (pendingAttachments.length >= maxAttachments) {
         App.ui.toast.show({ type: 'danger', title: `Máximo ${maxAttachments} imágenes` });
         return;
       }
-      const dataUrl = await compressImage(file, maxAttachmentDimension, attachmentQuality);
-      pendingAttachments.push(dataUrl);
-      modalEl.querySelector('#attachmentList').innerHTML = attachmentsPreviewHtml();
-      wireAttachmentRemoval(modalEl);
       fileInput.value = '';
+      submitBtn.disabled = true;
+      pendingUpload = compressImage(file, maxAttachmentDimension, attachmentQuality)
+        .then((dataUrl) => {
+          pendingAttachments.push(dataUrl);
+          modalEl.querySelector('#attachmentList').innerHTML = attachmentsPreviewHtml();
+          wireAttachmentRemoval(modalEl);
+        })
+        .catch((err) => {
+          App.ui.toast.show({ type: 'danger', title: 'No se pudo procesar la imagen', text: err.message });
+        })
+        .finally(() => {
+          pendingUpload = null;
+          submitBtn.disabled = false;
+        });
     });
 
     modalEl.querySelector('#createIncidentForm').addEventListener('submit', async (ev) => {
       ev.preventDefault();
+      // Si el usuario envía el formulario justo después de elegir una imagen, se
+      // espera a que termine de comprimirse antes de guardar (evita crear la
+      // incidencia sin el adjunto por una condición de carrera).
+      if (pendingUpload) await pendingUpload;
       const title = modalEl.querySelector('#incTitle').value;
       const category = modalEl.querySelector('#incCategory').value;
       const priority = modalEl.querySelector('#incPriority').value;
       const description = modalEl.querySelector('#incDescription').value;
-      await incidentService.create({ title, category, priority, description, attachments: pendingAttachments }, session);
-      App.ui.toast.show({ type: 'success', title: 'Incidencia creada', text: 'El administrador la revisará pronto.' });
-      close();
-      render();
+      try {
+        await incidentService.create({ title, category, priority, description, attachments: pendingAttachments }, session);
+        App.ui.toast.show({ type: 'success', title: 'Incidencia creada', text: 'El administrador la revisará pronto.' });
+        close();
+        render();
+      } catch (err) {
+        App.ui.toast.show({ type: 'danger', title: 'No se pudo crear la incidencia', text: err.message });
+      }
     });
   }
 
