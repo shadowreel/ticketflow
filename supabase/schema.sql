@@ -10,7 +10,7 @@
 -- =========================================================
 
 create table if not exists ticketflow_data (
-  id uuid primary key,
+  id text primary key,
   collection text not null,
   record jsonb not null,
   updated_at timestamptz not null default now()
