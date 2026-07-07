@@ -204,7 +204,7 @@
               <select id="incCategory" class="input">${categories.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')}</select>
             </div>
             <div class="form-group">
-              <label for="incLocation">📍 Ubicación de la incidencia</label>
+              <label for="incLocation">Ubicación de la incidencia</label>
               <select id="incLocation" class="input" required>
                 <option value="" disabled selected>Selecciona una ubicación...</option>
                 ${activeLocations.map((l) => `<option value="${escapeHtml(l.name)}">${escapeHtml(l.name)}</option>`).join('')}

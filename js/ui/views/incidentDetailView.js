@@ -106,7 +106,7 @@
             <div class="detail-meta-grid">
               <div class="detail-meta-item"><div class="label">Reportado por</div><div class="value">${escapeHtml(incident.reportedBy.name)}</div></div>
               <div class="detail-meta-item"><div class="label">Categoría</div><div class="value">${escapeHtml(incident.category)}</div></div>
-              <div class="detail-meta-item"><div class="label">📍 Ubicación</div><div class="value">${escapeHtml(incident.location || '—')}</div></div>
+              <div class="detail-meta-item"><div class="label">Ubicación</div><div class="value">${escapeHtml(incident.location || '—')}</div></div>
               <div class="detail-meta-item"><div class="label">Creada</div><div class="value">${formatDate(incident.createdAt)}</div></div>
               <div class="detail-meta-item"><div class="label">Última actualización</div><div class="value">${formatRelativeTime(incident.updatedAt)}</div></div>
               <div class="detail-meta-item"><div class="label">Asignada el</div><div class="value">${formatDate(incident.assignedAt)}</div></div>

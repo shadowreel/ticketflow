@@ -7,9 +7,7 @@
 
   const reportService = App.services.reportService;
   const exportService = App.services.exportService;
-  const statsService = App.services.statsService;
   const storage = App.data.storageAdapter;
-  const charts = App.ui.charts;
   const { escapeHtml, formatDate, formatMinutes } = App.core.utils;
   const { priorities, statusFlow } = App.config;
 
@@ -158,26 +156,20 @@
   function wireExports(container) {
     const stamp = new Date().toISOString().slice(0, 10);
     container.querySelector('#exportCsvBtn').addEventListener('click', () => {
-      exportService.toCSV(lastReport.rows, `reporte-ticketflow-${stamp}.csv`);
+      exportService.toCSV(lastReport.rows, `reporte-incidencias-${stamp}.csv`);
     });
     container.querySelector('#exportExcelBtn').addEventListener('click', () => {
-      exportService.toExcel(lastReport.rows, `reporte-ticketflow-${stamp}.xlsx`);
+      exportService.toExcel(lastReport.rows, `reporte-incidencias-${stamp}.xlsx`);
     });
     container.querySelector('#exportPdfBtn').addEventListener('click', () => {
-      exportService.toPDF(lastReport.summary, lastReport.rows, `reporte-ticketflow-${stamp}.pdf`);
+      exportService.toPDF(lastReport.summary, lastReport.rows, `reporte-incidencias-${stamp}.pdf`);
     });
     container.querySelector('#execReportBtn').addEventListener('click', async () => {
       const btn = container.querySelector('#execReportBtn');
       btn.disabled = true;
       try {
-        const perf = await statsService.getPerformanceStats();
-        const STATUS_COLORS = { 'Pendiente': 'var(--warning-500)', 'Asignada': 'var(--info-500)', 'En Proceso': 'var(--accent-500)', 'Resuelta': 'var(--success-500)' };
-        const chartsData = [
-          { title: 'Incidencias por prioridad', width: 220, html: charts.barList(perf.byPriority) },
-          { title: 'Incidencias por ubicación', width: 220, html: charts.barList(perf.byLocation) },
-        ];
-        await exportService.generateExecutivePDF(lastReport.summary, chartsData, `informe-ejecutivo-ticketflow-${stamp}.pdf`);
-        App.ui.toast.show({ type: 'success', title: 'Informe ejecutivo generado' });
+        await exportService.generateExecutivePDF(lastReport.summary, lastReport.rows, `informe-tecnico-incidencias-${stamp}.pdf`);
+        App.ui.toast.show({ type: 'success', title: 'Informe técnico generado' });
       } catch (err) {
         App.ui.toast.show({ type: 'danger', title: 'No se pudo generar el informe', text: err.message });
       } finally {

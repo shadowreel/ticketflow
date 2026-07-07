@@ -5,19 +5,14 @@
   'use strict';
 
   const storage = App.data.storageAdapter;
-  const locationService = App.services.locationService;
   const { escapeHtml } = App.core.utils;
 
   const TRASH_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>';
-  const UP_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>';
-  const DOWN_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>';
-  const POWER_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 11-12.73 0M12 2v10"/></svg>';
 
   async function render() {
     const container = document.getElementById('viewContainer');
     const categories = await storage.getSetting('categories', App.config.defaultCategories);
     const sla = await storage.getSetting('sla', App.config.defaultSla);
-    const locations = await locationService.listAll();
 
     const collaborative = storage.isCollaborative();
 
@@ -71,16 +66,6 @@
       </div>
 
       <div class="card card-pad settings-section">
-        <h3>📍 Gestión de Ubicaciones</h3>
-        <p>Ubicaciones disponibles al reportar una incidencia. Puedes agregar, desactivar o reordenar cualquier ubicación (no se limita a laboratorios).</p>
-        <div id="locationList"></div>
-        <form id="addLocationForm" style="display:flex;gap:8px;margin-top:16px;max-width:360px;">
-          <input type="text" id="newLocation" class="input" placeholder="Ej. Biblioteca, Aula 101...">
-          <button type="submit" class="btn btn-secondary">Agregar</button>
-        </form>
-      </div>
-
-      <div class="card card-pad settings-section">
         <h3>Tiempo objetivo de resolución (SLA)</h3>
         <p>Minutos esperados de resolución según prioridad. Se usa para medir el cumplimiento en las estadísticas.</p>
         <div id="slaForm" class="form-row" style="grid-template-columns:repeat(4,1fr);"></div>
@@ -99,7 +84,6 @@
     `;
 
     renderCategories(categories);
-    renderLocations(locations);
     renderSlaInputs(sla);
 
     container.querySelectorAll('[data-theme-option]').forEach((btn) => {
@@ -126,21 +110,6 @@
       input.value = '';
       renderCategories(await storage.getSetting('categories', App.config.defaultCategories));
       App.ui.toast.show({ type: 'success', title: 'Categoría agregada' });
-    });
-
-    document.getElementById('addLocationForm').addEventListener('submit', async (ev) => {
-      ev.preventDefault();
-      const input = document.getElementById('newLocation');
-      const value = input.value.trim();
-      if (!value) return;
-      try {
-        await locationService.create(value);
-        input.value = '';
-        renderLocations(await locationService.listAll());
-        App.ui.toast.show({ type: 'success', title: 'Ubicación agregada' });
-      } catch (err) {
-        App.ui.toast.show({ type: 'danger', title: 'No se pudo agregar', text: err.message });
-      }
     });
 
     document.getElementById('saveSlaBtn').addEventListener('click', async () => {
@@ -192,52 +161,6 @@
         const current = await storage.getSetting('categories', App.config.defaultCategories);
         await storage.setSetting('categories', current.filter((c) => c !== btn.dataset.removeCat));
         renderCategories(await storage.getSetting('categories', App.config.defaultCategories));
-      });
-    });
-  }
-
-  function renderLocations(locations) {
-    const wrap = document.getElementById('locationList');
-    wrap.innerHTML = `
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead><tr><th>Ubicación</th><th>Estado</th><th></th></tr></thead>
-          <tbody>
-            ${locations.map((l, i) => `
-              <tr>
-                <td>${escapeHtml(l.name)}</td>
-                <td><span class="pill ${l.active === false ? 'tone-neutral' : 'priority-baja'}">${l.active === false ? 'Inactiva' : 'Activa'}</span></td>
-                <td>
-                  <div class="row-actions">
-                    <button type="button" class="action-btn" data-move-loc="${l.id}" data-dir="-1" title="Subir" ${i === 0 ? 'disabled' : ''}>${UP_ICON}</button>
-                    <button type="button" class="action-btn" data-move-loc="${l.id}" data-dir="1" title="Bajar" ${i === locations.length - 1 ? 'disabled' : ''}>${DOWN_ICON}</button>
-                    <button type="button" class="action-btn" data-toggle-loc="${l.id}" data-next-active="${l.active === false}" title="${l.active === false ? 'Activar' : 'Desactivar'}">${POWER_ICON}</button>
-                    <button type="button" class="action-btn danger" data-remove-loc="${l.id}" title="Eliminar">${TRASH_ICON}</button>
-                  </div>
-                </td>
-              </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>
-      ${!locations.length ? '<p class="text-tertiary" style="font-size:var(--fs-sm);">Sin ubicaciones registradas.</p>' : ''}
-    `;
-    wrap.querySelectorAll('[data-remove-loc]').forEach((btn) => {
-      btn.addEventListener('click', async () => {
-        if (!confirm('¿Eliminar esta ubicación? Las incidencias ya creadas conservan el nombre que tenían.')) return;
-        await locationService.remove(btn.dataset.removeLoc);
-        renderLocations(await locationService.listAll());
-      });
-    });
-    wrap.querySelectorAll('[data-toggle-loc]').forEach((btn) => {
-      btn.addEventListener('click', async () => {
-        await locationService.setActive(btn.dataset.toggleLoc, btn.dataset.nextActive === 'true');
-        renderLocations(await locationService.listAll());
-      });
-    });
-    wrap.querySelectorAll('[data-move-loc]').forEach((btn) => {
-      btn.addEventListener('click', async () => {
-        await locationService.move(btn.dataset.moveLoc, Number(btn.dataset.dir));
-        renderLocations(await locationService.listAll());
       });
     });
   }

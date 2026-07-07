@@ -36,6 +36,7 @@
     router.register('/incidencias/:id', guardRole(all, (p) => (V.incidentDetailView ? V.incidentDetailView.render(p) : renderComingSoon('Detalle de incidencia'))));
     router.register('/tecnicos', guardRole([App.config.roles.ADMIN], (p) => (V.technicianManagementView ? V.technicianManagementView.render(p) : renderComingSoon('Técnicos'))));
     router.register('/usuarios', guardRole([App.config.roles.ADMIN], (p) => (V.userManagementView ? V.userManagementView.render(p) : renderComingSoon('Usuarios'))));
+    router.register('/ubicaciones', guardRole([App.config.roles.ADMIN], (p) => (V.locationManagementView ? V.locationManagementView.render(p) : renderComingSoon('Ubicaciones'))));
     router.register('/reportes', guardRole([App.config.roles.ADMIN], (p) => (V.reportsView ? V.reportsView.render(p) : renderComingSoon('Reportes'))));
     router.register('/auditoria', guardRole([App.config.roles.ADMIN], (p) => (V.auditView ? V.auditView.render(p) : renderComingSoon('Auditoría'))));
     router.register('/configuracion', guardRole([App.config.roles.ADMIN], (p) => (V.settingsView ? V.settingsView.render(p) : renderComingSoon('Configuración'))));
