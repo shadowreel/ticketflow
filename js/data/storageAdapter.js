@@ -61,7 +61,7 @@
     bus.emit('data:changed', { collection: ev.key.slice(PREFIX.length), remote: true });
   });
 
-  const BACKUP_COLLECTIONS = ['admin', 'technicians', 'users', 'incidents', 'notifications', 'settings', 'counters'];
+  const BACKUP_COLLECTIONS = ['admin', 'technicians', 'users', 'incidents', 'notifications', 'settings', 'counters', 'audit_log'];
 
   const localEngine = {
     async getAll(collection) { return readRaw(collection) || []; },

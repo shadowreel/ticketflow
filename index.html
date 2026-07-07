@@ -7,12 +7,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/01-tokens.css?v=17">
-  <link rel="stylesheet" href="css/02-base.css?v=17">
-  <link rel="stylesheet" href="css/03-layout.css?v=17">
-  <link rel="stylesheet" href="css/04-components.css?v=17">
-  <link rel="stylesheet" href="css/05-pages.css?v=17">
-  <link rel="stylesheet" href="css/06-motion.css?v=17">
+  <link rel="stylesheet" href="css/01-tokens.css?v=19">
+  <link rel="stylesheet" href="css/02-base.css?v=19">
+  <link rel="stylesheet" href="css/03-layout.css?v=19">
+  <link rel="stylesheet" href="css/04-components.css?v=19">
+  <link rel="stylesheet" href="css/05-pages.css?v=19">
+  <link rel="stylesheet" href="css/06-motion.css?v=19">
 </head>
 <body>
 
@@ -94,46 +94,58 @@
        supabaseConfig.js tiene credenciales reales; si no, cae en localStorage. -->
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
-  <script defer src="js/core/config.js?v=17"></script>
-  <script defer src="js/core/supabaseConfig.js?v=17"></script>
-  <script defer src="js/core/utils.js?v=17"></script>
-  <script defer src="js/core/eventBus.js?v=17"></script>
-  <script defer src="js/core/theme.js?v=17"></script>
+  <!-- Exportación de reportes (módulo Reportes): Excel (SheetJS) y PDF (jsPDF + autotable) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 
-  <script defer src="js/data/storageAdapter.js?v=17"></script>
-  <script defer src="js/data/adminRepository.js?v=17"></script>
-  <script defer src="js/data/userRepository.js?v=17"></script>
-  <script defer src="js/data/technicianRepository.js?v=17"></script>
-  <script defer src="js/data/incidentRepository.js?v=17"></script>
-  <script defer src="js/data/notificationRepository.js?v=17"></script>
-  <script defer src="js/data/bootstrap.js?v=17"></script>
+  <script defer src="js/core/config.js?v=19"></script>
+  <script defer src="js/core/supabaseConfig.js?v=19"></script>
+  <script defer src="js/core/utils.js?v=19"></script>
+  <script defer src="js/core/eventBus.js?v=19"></script>
+  <script defer src="js/core/theme.js?v=19"></script>
 
-  <script defer src="js/services/authService.js?v=17"></script>
-  <script defer src="js/services/incidentService.js?v=17"></script>
-  <script defer src="js/services/technicianService.js?v=17"></script>
-  <script defer src="js/services/adminService.js?v=17"></script>
-  <script defer src="js/services/notificationService.js?v=17"></script>
-  <script defer src="js/services/statsService.js?v=17"></script>
+  <script defer src="js/data/storageAdapter.js?v=19"></script>
+  <script defer src="js/data/adminRepository.js?v=19"></script>
+  <script defer src="js/data/userRepository.js?v=19"></script>
+  <script defer src="js/data/technicianRepository.js?v=19"></script>
+  <script defer src="js/data/incidentRepository.js?v=19"></script>
+  <script defer src="js/data/notificationRepository.js?v=19"></script>
+  <script defer src="js/data/auditRepository.js?v=19"></script>
+  <script defer src="js/data/bootstrap.js?v=19"></script>
 
-  <script defer src="js/ui/components/modal.js?v=17"></script>
-  <script defer src="js/ui/components/toast.js?v=17"></script>
-  <script defer src="js/ui/components/dropdown.js?v=17"></script>
-  <script defer src="js/ui/components/charts.js?v=17"></script>
-  <script defer src="js/ui/components/skeleton.js?v=17"></script>
-  <script defer src="js/ui/components/ripple.js?v=17"></script>
+  <script defer src="js/services/authService.js?v=19"></script>
+  <script defer src="js/services/locationService.js?v=19"></script>
+  <script defer src="js/services/incidentService.js?v=19"></script>
+  <script defer src="js/services/technicianService.js?v=19"></script>
+  <script defer src="js/services/adminService.js?v=19"></script>
+  <script defer src="js/services/notificationService.js?v=19"></script>
+  <script defer src="js/services/statsService.js?v=19"></script>
+  <script defer src="js/services/auditService.js?v=19"></script>
+  <script defer src="js/services/reportService.js?v=19"></script>
+  <script defer src="js/services/exportService.js?v=19"></script>
 
-  <script defer src="js/ui/router.js?v=17"></script>
+  <script defer src="js/ui/components/modal.js?v=19"></script>
+  <script defer src="js/ui/components/toast.js?v=19"></script>
+  <script defer src="js/ui/components/dropdown.js?v=19"></script>
+  <script defer src="js/ui/components/charts.js?v=19"></script>
+  <script defer src="js/ui/components/skeleton.js?v=19"></script>
+  <script defer src="js/ui/components/ripple.js?v=19"></script>
 
-  <script defer src="js/ui/views/loginView.js?v=17"></script>
-  <script defer src="js/ui/views/shellView.js?v=17"></script>
-  <script defer src="js/ui/views/dashboardView.js?v=17"></script>
-  <script defer src="js/ui/views/incidentsView.js?v=17"></script>
-  <script defer src="js/ui/views/incidentDetailView.js?v=17"></script>
-  <script defer src="js/ui/views/technicianManagementView.js?v=17"></script>
-  <script defer src="js/ui/views/userManagementView.js?v=17"></script>
-  <script defer src="js/ui/views/profileView.js?v=17"></script>
-  <script defer src="js/ui/views/settingsView.js?v=17"></script>
+  <script defer src="js/ui/router.js?v=19"></script>
 
-  <script defer src="js/app.js?v=17"></script>
+  <script defer src="js/ui/views/loginView.js?v=19"></script>
+  <script defer src="js/ui/views/shellView.js?v=19"></script>
+  <script defer src="js/ui/views/dashboardView.js?v=19"></script>
+  <script defer src="js/ui/views/incidentsView.js?v=19"></script>
+  <script defer src="js/ui/views/incidentDetailView.js?v=19"></script>
+  <script defer src="js/ui/views/technicianManagementView.js?v=19"></script>
+  <script defer src="js/ui/views/userManagementView.js?v=19"></script>
+  <script defer src="js/ui/views/reportsView.js?v=19"></script>
+  <script defer src="js/ui/views/auditView.js?v=19"></script>
+  <script defer src="js/ui/views/profileView.js?v=19"></script>
+  <script defer src="js/ui/views/settingsView.js?v=19"></script>
+
+  <script defer src="js/app.js?v=19"></script>
 </body>
 </html>

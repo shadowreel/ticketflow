@@ -12,6 +12,7 @@
   const SESSION_KEY = 'ticketflow:session';
   const { hashPassword } = App.core.utils;
   const { roles } = App.config;
+  const bus = App.core.eventBus;
   const adminRepo = App.data.adminRepository;
   const technicianRepo = App.data.technicianRepository;
   const userRepo = App.data.userRepository;
@@ -75,6 +76,7 @@
     const record = await userRepo.create({ name: name.trim(), email: email.trim().toLowerCase(), passwordHash, avatar: null });
     const session = toSessionFromUser(record);
     writeSession(session);
+    bus.emit('user:registered', session);
     return session;
   }
 

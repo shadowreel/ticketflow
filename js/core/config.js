@@ -19,6 +19,9 @@
 
     defaultCategories: ['Hardware', 'Software', 'Red / Conectividad', 'Accesos y Cuentas', 'Otro'],
 
+    // Ubicaciones iniciales — el admin agrega/edita/desactiva/reordena desde Configuración
+    defaultLocations: ['Laboratorio A', 'Laboratorio B', 'Laboratorio C'],
+
     priorities: ['Baja', 'Media', 'Alta', 'Crítica'],
 
     // SLA en minutos por prioridad — usado para medir cumplimiento en las estadísticas

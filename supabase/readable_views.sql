@@ -77,7 +77,8 @@ select
   record ->> 'folio'                                                    as folio,
   record ->> 'title'                                                    as titulo,
   record ->> 'category'                                                 as categoria,
-  record ->> 'priority'                                                 as prioridad,
+  record ->> 'location'                                                 as ubicacion,
+  coalesce(record ->> 'priority', 'Sin asignar')                        as prioridad,
   record ->> 'status'                                                   as estado,
   record -> 'reportedBy' ->> 'name'                                     as reportado_por,
   record -> 'assignedTo' ->> 'name'                                     as asignado_a,
@@ -104,6 +105,41 @@ select
 from ticketflow_data
 where collection = 'notifications'
 order by creado desc;
+
+
+-- -------------------------------------------------------------
+-- 6) v_ubicaciones — catálogo de ubicaciones (Configuración → Gestión de Ubicaciones)
+--    Vive dentro del setting "locations" (fila única de la colección "meta"),
+--    por eso se expande el arreglo con jsonb_array_elements en vez de filtrar por "collection".
+-- -------------------------------------------------------------
+drop view if exists v_ubicaciones;
+create view v_ubicaciones as
+select
+  elem ->> 'id'                          as id,
+  elem ->> 'name'                        as nombre,
+  coalesce((elem ->> 'active')::boolean, true) as activa,
+  (elem ->> 'order')::int                as orden
+from ticketflow_data, jsonb_array_elements(record -> 'locations') as elem
+where collection = 'meta' and id = '00000000-0000-0000-0000-000000000002'
+order by orden;
+
+
+-- -------------------------------------------------------------
+-- 7) v_auditoria — historial de auditoría (nunca se elimina automáticamente)
+-- -------------------------------------------------------------
+drop view if exists v_auditoria;
+create view v_auditoria as
+select
+  id                                                     as id,
+  record ->> 'actorName'                                 as usuario,
+  record ->> 'actorRole'                                 as rol,
+  record ->> 'action'                                    as accion,
+  record ->> 'entityType'                                as tipo_entidad,
+  record ->> 'detail'                                    as detalle,
+  to_timestamp((record ->> 'createdAt')::bigint / 1000)  as fecha
+from ticketflow_data
+where collection = 'audit_log'
+order by fecha desc;
 
 
 -- =============================================================

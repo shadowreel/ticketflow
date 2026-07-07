@@ -8,7 +8,7 @@
 
   const storage = App.data.storageAdapter;
   const { hashPassword } = App.core.utils;
-  const { defaultAdmin, initialTechnicians, defaultCategories, defaultSla } = App.config;
+  const { defaultAdmin, initialTechnicians, defaultCategories, defaultSla, defaultLocations } = App.config;
 
   async function ensureAdmin() {
     const existing = await App.data.adminRepository.getAll();
@@ -50,6 +50,12 @@
     if (!sla) await storage.setSetting('sla', defaultSla);
     const theme = await storage.getSetting('theme', null);
     if (!theme) await storage.setSetting('theme', 'dark');
+    const locations = await storage.getSetting('locations', null);
+    if (!locations) {
+      await storage.setSetting('locations', defaultLocations.map((name, i) => ({
+        id: App.core.utils.uuid(), name, active: true, order: i,
+      })));
+    }
   }
 
   async function run() {

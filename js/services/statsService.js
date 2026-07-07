@@ -31,7 +31,10 @@
 
     const byStatus = Object.fromEntries(statusFlow.map((s) => [s, incidents.filter((i) => i.status === s).length]));
     const byPriority = Object.fromEntries(priorities.map((p) => [p, incidents.filter((i) => i.priority === p).length]));
+    byPriority['Sin asignar'] = incidents.filter((i) => !i.priority).length;
     const byCategory = categories.map((c) => ({ label: c, value: incidents.filter((i) => i.category === c).length }));
+    const locations = await App.services.locationService.listAll();
+    const byLocation = locations.map((l) => ({ label: l.name, value: incidents.filter((i) => i.location === l.name).length }));
 
     const resolved = incidents.filter((i) => i.status === 'Resuelta' && i.resolution);
     const avgResolutionMinutes = average(resolved.map((i) => i.resolution.timeSpentMinutes || 0));
@@ -57,7 +60,7 @@
       totalUsers: users.length,
       avgResolutionMinutes,
       slaCompliance,
-      byStatus, byPriority, byCategory, byTechnician,
+      byStatus, byPriority, byCategory, byLocation, byTechnician,
       topTechnician: byTechnician[0] && byTechnician[0].value > 0 ? byTechnician[0] : null,
       topUser: byUser[0] || null,
       recentActivity: flattenHistory(incidents).slice(0, 8),
@@ -95,7 +98,42 @@
     return getUserStats(session);
   }
 
+  /** Panel de Rendimiento (Dashboard, solo admin): métricas agregadas por técnico, ubicación y usuario. */
+  async function getPerformanceStats() {
+    const [incidents, technicians, users] = await Promise.all([incidentRepo.getAll(), technicianRepo.getAll(), userRepo.getAll()]);
+    const locations = await App.services.locationService.listAll();
+    const categories = await storage.getSetting('categories', defaultCategories);
+
+    const byTechnicianTotal = technicians.map((t) => ({
+      label: t.name,
+      resolved: incidents.filter((i) => i.assignedTo && i.assignedTo.id === t.id && i.status === 'Resuelta').length,
+      assigned: incidents.filter((i) => i.assignedTo && i.assignedTo.id === t.id).length,
+    })).sort((a, b) => b.resolved - a.resolved);
+
+    const byLocation = locations.map((l) => ({ label: l.name, value: incidents.filter((i) => i.location === l.name).length }))
+      .sort((a, b) => b.value - a.value);
+
+    const byUser = users.map((u) => ({ label: u.name, value: incidents.filter((i) => i.reportedBy.id === u.id).length }))
+      .sort((a, b) => b.value - a.value).filter((u) => u.value > 0);
+
+    const resolvedCount = incidents.filter((i) => i.status === 'Resuelta').length;
+
+    return {
+      byTechnicianTotal,
+      byLocation,
+      topLocation: byLocation[0] && byLocation[0].value > 0 ? byLocation[0] : null,
+      byPriority: priorities.map((p) => ({ label: p, value: incidents.filter((i) => i.priority === p).length }))
+        .concat([{ label: 'Sin asignar', value: incidents.filter((i) => !i.priority).length }]),
+      byCategory: categories.map((c) => ({ label: c, value: incidents.filter((i) => i.category === c).length })),
+      byUser,
+      activeTechnicians: technicians.filter((t) => t.active !== false).length,
+      inactiveTechnicians: technicians.filter((t) => t.active === false).length,
+      resolvedPercentage: incidents.length ? Math.round((resolvedCount / incidents.length) * 100) : null,
+      avgResolutionMinutes: average(incidents.filter((i) => i.status === 'Resuelta' && i.resolution).map((i) => i.resolution.timeSpentMinutes || 0)),
+    };
+  }
+
   App.services = App.services || {};
-  App.services.statsService = { getAdminStats, getTechnicianStats, getUserStats, getForSession };
+  App.services.statsService = { getAdminStats, getTechnicianStats, getUserStats, getForSession, getPerformanceStats };
 
 })(window.App = window.App || {});

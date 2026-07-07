@@ -39,13 +39,13 @@
       name: name.trim(), username: cleanUsername, email: email.trim().toLowerCase(), position: position.trim(),
       passwordHash, mustChangePassword: true, avatar: null,
     });
-    bus.emit('technician:created', record);
+    bus.emit('technician:created', { record, actor: App.services.authService.getCurrentSession() });
     return record;
   }
 
   async function update(id, patch) {
     const updated = await techRepo.update(id, patch);
-    bus.emit('technician:updated', updated);
+    bus.emit('technician:updated', { record: updated, actor: App.services.authService.getCurrentSession() });
     return updated;
   }
 
@@ -68,8 +68,9 @@
   async function remove(id) {
     const openIncidents = (await incidentRepo.getByTechnician(id)).filter((i) => i.status !== 'Resuelta');
     if (openIncidents.length) throw new Error('Este técnico tiene incidencias sin resolver. Reasígnalas antes de eliminarlo.');
+    const existing = await techRepo.getById(id);
     const ok = await techRepo.remove(id);
-    if (ok) bus.emit('technician:deleted', { id });
+    if (ok) bus.emit('technician:deleted', { id, name: existing && existing.name, actor: App.services.authService.getCurrentSession() });
     return ok;
   }
 

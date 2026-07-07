@@ -19,6 +19,8 @@
     wrench: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 10-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 005.4-5.4l-2.8 2.8-2-2z"/></svg>',
     clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>',
     target: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>',
+    critical: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
+    pulse: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
   };
 
   const STATUS_COLORS = { 'Pendiente': 'var(--warning-500)', 'Asignada': 'var(--info-500)', 'En Proceso': 'var(--accent-500)', 'Resuelta': 'var(--success-500)' };
@@ -54,6 +56,17 @@
       </div>`).join('')}</div>`;
   }
 
+  function controlCenterActivityItem(e) {
+    return `
+      <div class="activity-item">
+        <span class="item-icon" style="background:color-mix(in srgb, var(--accent-500) 16%, transparent); color:var(--accent-400);">${ICONS.pulse}</span>
+        <div>
+          <div class="item-title"><strong>${escapeHtml(e.actorName)}</strong> ${escapeHtml(e.action)} ${e.detail ? `<span class="text-tertiary">· ${escapeHtml(e.detail)}</span>` : ''}</div>
+          <div class="item-time">${formatRelativeTime(e.createdAt)}</div>
+        </div>
+      </div>`;
+  }
+
   async function render() {
     const session = auth.getCurrentSession();
     const container = document.getElementById('viewContainer');
@@ -63,12 +76,18 @@
     `;
     const stats = await statsService.getForSession(session);
 
-    if (session.role === roles.ADMIN) return renderAdmin(container, stats);
+    if (session.role === roles.ADMIN) {
+      const [performance, recentAudit] = await Promise.all([
+        statsService.getPerformanceStats(),
+        App.services.auditService.recentActivity(10 * 60 * 1000),
+      ]);
+      return renderAdmin(container, stats, performance, recentAudit);
+    }
     if (session.role === roles.TECHNICIAN) return renderTechnician(container, stats);
     return renderUser(container, stats);
   }
 
-  function renderAdmin(container, s) {
+  function renderAdmin(container, s, perf, recentAudit) {
     container.innerHTML = `
       <div class="content-header"><div><h1>Dashboard</h1><p>Panorama general del sistema de incidencias.</p></div></div>
       <div class="stats-grid">
@@ -114,6 +133,48 @@
             <div class="card-header"><h3>Actividad reciente</h3></div>
             ${activityListHtml(s.recentActivity)}
           </div>
+        </div>
+      </div>
+
+      <div class="card card-pad" style="margin-top:var(--space-5);">
+        <h3 style="margin-bottom:14px;">Panel de Rendimiento</h3>
+        <div class="dashboard-grid">
+          <div class="dashboard-col">
+            <h4 class="text-tertiary" style="font-size:var(--fs-sm);font-weight:var(--fw-medium);margin-bottom:8px;">Incidencias por ubicación</h4>
+            ${perf.byLocation.some((l) => l.value > 0) ? charts.barList(perf.byLocation) : '<p class="text-tertiary" style="font-size:var(--fs-sm);">Aún no hay datos.</p>'}
+          </div>
+          <div class="dashboard-col">
+            <h4 class="text-tertiary" style="font-size:var(--fs-sm);font-weight:var(--fw-medium);margin-bottom:8px;">Usuarios con más incidencias reportadas</h4>
+            ${perf.byUser.length ? perf.byUser.slice(0, 5).map((u, i) => `
+              <div class="leaderboard-item"><span class="leaderboard-rank ${i === 0 ? 'gold' : ''}">${i + 1}</span><span class="leaderboard-name">${escapeHtml(u.label)}</span><span class="leaderboard-value">${u.value} reportadas</span></div>
+            `).join('') : '<div class="empty-state" style="padding:16px;"><p>Aún no hay datos.</p></div>'}
+          </div>
+        </div>
+        <div class="kpi-row" style="margin-top:var(--space-4);">
+          <div class="kpi-item"><div class="kpi-value">${perf.topLocation ? escapeHtml(perf.topLocation.label) : '—'}</div><div class="kpi-label">Ubicación con más incidencias</div></div>
+          <div class="kpi-item"><div class="kpi-value">${perf.activeTechnicians}</div><div class="kpi-label">Técnicos activos</div></div>
+          <div class="kpi-item"><div class="kpi-value">${perf.inactiveTechnicians}</div><div class="kpi-label">Técnicos inactivos</div></div>
+          <div class="kpi-item"><div class="kpi-value">${perf.resolvedPercentage == null ? '—' : perf.resolvedPercentage + '%'}</div><div class="kpi-label">% Incidencias resueltas</div></div>
+        </div>
+      </div>
+
+      <div class="card card-pad" style="margin-top:var(--space-5);">
+        <h3 style="margin-bottom:14px;">Centro de Control</h3>
+        <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
+          ${statCard(ICONS.pending, 'warning', 'Incidencias pendientes', s.pending)}
+          ${statCard(ICONS.critical, 'danger', 'Incidencias críticas', s.byPriority['Crítica'] || 0)}
+          ${statCard(ICONS.wrench, 'accent', 'Técnicos activos', perf.activeTechnicians)}
+          ${statCard(ICONS.resolved, 'success', 'Estado del sistema', App.data.storageAdapter.isCollaborative() ? 'Colaborativo' : 'Local')}
+        </div>
+        <h4 class="text-tertiary" style="font-size:var(--fs-sm);font-weight:var(--fw-medium);margin:var(--space-4) 0 8px;">Actividad reciente (últimos 10 min)</h4>
+        ${recentAudit.length ? `<div class="activity-list">${recentAudit.map(controlCenterActivityItem).join('')}</div>` : '<div class="empty-state" style="padding:16px;"><p>Sin actividad en los últimos minutos.</p></div>'}
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:var(--space-4);">
+          <a href="#/reportes" class="btn btn-secondary btn-sm">Reportes</a>
+          <a href="#/auditoria" class="btn btn-secondary btn-sm">Auditoría</a>
+          <a href="#/tecnicos" class="btn btn-secondary btn-sm">Técnicos</a>
+          <a href="#/usuarios" class="btn btn-secondary btn-sm">Usuarios</a>
+          <a href="#/configuracion" class="btn btn-secondary btn-sm">Configuración</a>
+          <a href="#/dashboard" class="btn btn-secondary btn-sm">Dashboard</a>
         </div>
       </div>
     `;

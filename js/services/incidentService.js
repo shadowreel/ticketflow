@@ -30,7 +30,7 @@
 
   async function getById(id) { return repo.getById(id); }
 
-  async function create({ title, description, category, priority, attachments }, session) {
+  async function create({ title, description, category, location, attachments }, session) {
     const folio = await repo.nextFolio();
     const now = Date.now();
     const record = {
@@ -38,7 +38,8 @@
       title: title.trim(),
       description: (description || '').trim(),
       category,
-      priority,
+      location,
+      priority: null, // el usuario ya no elige prioridad; la asigna el administrador al revisar
       status: 'Pendiente',
       reportedBy: { id: session.id, name: session.name, email: session.email },
       assignedTo: null,
@@ -106,7 +107,7 @@
     const updated = await repo.update(id, {
       priority,
       updatedAt: Date.now(),
-      history: [...current.history, historyEntry(`cambió la prioridad a "${priority}"`, session)],
+      history: [...current.history, historyEntry(`cambió la prioridad a "${priority || 'Sin asignar'}"`, session)],
     });
     bus.emit('incident:updated', updated);
     return updated;

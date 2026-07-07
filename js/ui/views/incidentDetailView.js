@@ -48,7 +48,7 @@
           <a href="#/incidencias" class="btn btn-ghost btn-sm" style="margin-bottom:8px;">${BACK_ICON}<span>Volver</span></a>
           <h1 class="mono" style="display:flex;align-items:center;gap:10px;">${incident.folio}
             <span class="pill status-${statusSlug(incident.status)}">${incident.status}</span>
-            <span class="pill priority-${slug(incident.priority)}">${incident.priority}</span>
+            <span class="pill ${incident.priority ? 'priority-' + slug(incident.priority) : 'tone-neutral'}">${escapeHtml(incident.priority || 'Sin asignar')}</span>
           </h1>
           <p>${escapeHtml(incident.title)}</p>
         </div>
@@ -106,6 +106,7 @@
             <div class="detail-meta-grid">
               <div class="detail-meta-item"><div class="label">Reportado por</div><div class="value">${escapeHtml(incident.reportedBy.name)}</div></div>
               <div class="detail-meta-item"><div class="label">Categoría</div><div class="value">${escapeHtml(incident.category)}</div></div>
+              <div class="detail-meta-item"><div class="label">📍 Ubicación</div><div class="value">${escapeHtml(incident.location || '—')}</div></div>
               <div class="detail-meta-item"><div class="label">Creada</div><div class="value">${formatDate(incident.createdAt)}</div></div>
               <div class="detail-meta-item"><div class="label">Última actualización</div><div class="value">${formatRelativeTime(incident.updatedAt)}</div></div>
               <div class="detail-meta-item"><div class="label">Asignada el</div><div class="value">${formatDate(incident.assignedAt)}</div></div>
@@ -115,7 +116,10 @@
             ${session.role === roles.ADMIN ? `
               <div class="form-group">
                 <label for="priorityAdminSelect">Prioridad</label>
-                <select id="priorityAdminSelect" class="input">${priorities.map((p) => `<option value="${p}" ${incident.priority === p ? 'selected' : ''}>${p}</option>`).join('')}</select>
+                <select id="priorityAdminSelect" class="input">
+                  <option value="" ${!incident.priority ? 'selected' : ''}>Sin asignar</option>
+                  ${priorities.map((p) => `<option value="${p}" ${incident.priority === p ? 'selected' : ''}>${p}</option>`).join('')}
+                </select>
               </div>
               <div class="form-group">
                 <label for="statusAdminSelect">Estado</label>
@@ -209,7 +213,7 @@
 
     const prioritySelect = container.querySelector('#priorityAdminSelect');
     if (prioritySelect) prioritySelect.addEventListener('change', async () => {
-      await incidentService.updatePriority(incident.id, prioritySelect.value, session);
+      await incidentService.updatePriority(incident.id, prioritySelect.value || null, session);
       App.ui.toast.show({ type: 'success', title: 'Prioridad actualizada' });
       render({ id: incident.id });
     });

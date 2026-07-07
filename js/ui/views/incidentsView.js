@@ -34,6 +34,7 @@
     if (!container.querySelector('.data-table')) container.innerHTML = App.ui.skeleton.table(5);
     const all = await incidentService.listForSession(session);
     const categories = await storage.getSetting('categories', App.config.defaultCategories);
+    const activeLocations = await App.services.locationService.listActive();
     const technicians = session.role === roles.ADMIN ? await technicianRepo.getActive() : [];
 
     const statuses = session.role === roles.TECHNICIAN
@@ -42,7 +43,11 @@
 
     let filtered = all;
     if (state.statusFilter !== 'Todas') filtered = filtered.filter((i) => i.status === state.statusFilter);
-    if (state.priorityFilter !== 'Todas') filtered = filtered.filter((i) => i.priority === state.priorityFilter);
+    if (state.priorityFilter !== 'Todas') {
+      filtered = state.priorityFilter === '__unassigned__'
+        ? filtered.filter((i) => !i.priority)
+        : filtered.filter((i) => i.priority === state.priorityFilter);
+    }
     if (state.search.trim()) {
       const q = state.search.trim().toLowerCase();
       filtered = filtered.filter((i) => i.folio.toLowerCase().includes(q) || i.title.toLowerCase().includes(q));
@@ -63,6 +68,7 @@
         ${session.role === roles.ADMIN ? `
           <select class="input" id="priorityFilter" style="width:auto;height:32px;">
             <option value="Todas">Toda prioridad</option>
+            <option value="__unassigned__" ${state.priorityFilter === '__unassigned__' ? 'selected' : ''}>Sin asignar</option>
             ${priorities.map((p) => `<option value="${p}" ${state.priorityFilter === p ? 'selected' : ''}>${p}</option>`).join('')}
           </select>` : ''}
         <div class="search-inline">
@@ -78,7 +84,7 @@
             <thead><tr>
               <th>Folio</th><th>Título</th>
               ${session.role === roles.ADMIN ? '<th>Usuario</th>' : ''}
-              <th>Categoría</th><th>Prioridad</th><th>Estado</th>
+              <th>Categoría</th><th>Ubicación</th><th>Prioridad</th><th>Estado</th>
               ${session.role !== roles.USER ? '' : '<th>Técnico</th>'}
               ${session.role === roles.ADMIN ? '<th>Técnico</th>' : ''}
               <th>Fecha</th><th></th>
@@ -100,7 +106,7 @@
     wireRowActions(container, session);
 
     if (session.role === roles.USER) {
-      document.getElementById('newIncidentBtn').addEventListener('click', () => openCreateModal(session, categories));
+      document.getElementById('newIncidentBtn').addEventListener('click', () => openCreateModal(session, categories, activeLocations));
     }
   }
 
@@ -111,7 +117,8 @@
         <td class="cell-title" title="${escapeHtml(inc.title)}">${escapeHtml(inc.title)}</td>
         ${session.role === roles.ADMIN ? `<td>${escapeHtml(inc.reportedBy.name)}</td>` : ''}
         <td>${escapeHtml(inc.category)}</td>
-        <td><span class="pill priority-${slug(inc.priority)}">${inc.priority}</span></td>
+        <td>${escapeHtml(inc.location || '—')}</td>
+        <td><span class="pill ${inc.priority ? 'priority-' + slug(inc.priority) : 'tone-neutral'}">${escapeHtml(inc.priority || 'Sin asignar')}</span></td>
         <td>
           ${session.role === roles.ADMIN ? `
           <select class="input status-select" data-id="${inc.id}" style="height:30px;padding:0 8px;">
@@ -180,7 +187,7 @@
       </div>`).join('');
   }
 
-  function openCreateModal(session, categories) {
+  function openCreateModal(session, categories, activeLocations) {
     pendingAttachments = [];
     const { close } = App.ui.modal.open({
       title: 'Nueva incidencia',
@@ -197,8 +204,11 @@
               <select id="incCategory" class="input">${categories.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')}</select>
             </div>
             <div class="form-group">
-              <label for="incPriority">Prioridad</label>
-              <select id="incPriority" class="input">${priorities.map((p) => `<option value="${p}">${p}</option>`).join('')}</select>
+              <label for="incLocation">📍 Ubicación de la incidencia</label>
+              <select id="incLocation" class="input" required>
+                <option value="" disabled selected>Selecciona una ubicación...</option>
+                ${activeLocations.map((l) => `<option value="${escapeHtml(l.name)}">${escapeHtml(l.name)}</option>`).join('')}
+              </select>
             </div>
           </div>
           <div class="form-group">
@@ -261,10 +271,10 @@
       if (pendingUpload) await pendingUpload;
       const title = modalEl.querySelector('#incTitle').value;
       const category = modalEl.querySelector('#incCategory').value;
-      const priority = modalEl.querySelector('#incPriority').value;
+      const location = modalEl.querySelector('#incLocation').value;
       const description = modalEl.querySelector('#incDescription').value;
       try {
-        await incidentService.create({ title, category, priority, description, attachments: pendingAttachments }, session);
+        await incidentService.create({ title, category, location, description, attachments: pendingAttachments }, session);
         App.ui.toast.show({ type: 'success', title: 'Incidencia creada', text: 'El administrador la revisará pronto.' });
         close();
         render();

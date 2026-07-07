@@ -34,13 +34,13 @@
       name: name.trim(), username: cleanUsername, email: email.trim().toLowerCase(),
       passwordHash, mustChangePassword: true, avatar: null,
     });
-    bus.emit('admin:created', record);
+    bus.emit('admin:created', { record, actor: App.services.authService.getCurrentSession() });
     return record;
   }
 
   async function update(id, patch) {
     const updated = await adminRepo.update(id, patch);
-    bus.emit('admin:updated', updated);
+    bus.emit('admin:updated', { record: updated, actor: App.services.authService.getCurrentSession() });
     return updated;
   }
 
@@ -56,8 +56,9 @@
     if (id === currentSessionId) throw new Error('No puedes eliminar tu propia cuenta mientras tienes la sesión iniciada.');
     const all = await adminRepo.getAll();
     if (all.length <= 1) throw new Error('Debe existir al menos un administrador en el sistema.');
+    const existing = await adminRepo.getById(id);
     const ok = await adminRepo.remove(id);
-    if (ok) bus.emit('admin:deleted', { id });
+    if (ok) bus.emit('admin:deleted', { id, name: existing && existing.name, actor: App.services.authService.getCurrentSession() });
     return ok;
   }
 
