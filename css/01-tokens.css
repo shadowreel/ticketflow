@@ -72,10 +72,10 @@
   --danger-600: #dc2626;
   --info-500: #0ea5e9;
 
-  /* Prioridades */
-  --priority-baja: #64748b;
-  --priority-media: #0ea5e9;
-  --priority-alta: #f59e0b;
+  /* Prioridades: verde (baja) → amarillo (media) → naranja (alta) → rojo (crítica) */
+  --priority-baja: #22c55e;
+  --priority-media: #eab308;
+  --priority-alta: #f97316;
   --priority-critica: #ef4444;
 
   /* z-index */

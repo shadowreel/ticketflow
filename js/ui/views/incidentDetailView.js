@@ -117,7 +117,7 @@
               <form id="triageForm" style="margin-top:4px;">
                 <div class="form-group">
                   <label for="priorityAdminSelect">Prioridad</label>
-                  <select id="priorityAdminSelect" class="input">
+                  <select id="priorityAdminSelect" class="input ${incident.priority ? 'priority-select-' + slug(incident.priority) : 'priority-select-none'}">
                     <option value="" ${!incident.priority ? 'selected' : ''}>Sin asignar</option>
                     ${priorities.map((p) => `<option value="${p}" ${incident.priority === p ? 'selected' : ''}>${p}</option>`).join('')}
                   </select>
@@ -213,6 +213,11 @@
 
     const editBtn = container.querySelector('#editIncidentBtn');
     if (editBtn) editBtn.addEventListener('click', () => openEditModal(incident, session));
+
+    const prioritySelect = container.querySelector('#priorityAdminSelect');
+    if (prioritySelect) prioritySelect.addEventListener('change', () => {
+      prioritySelect.className = `input ${prioritySelect.value ? 'priority-select-' + slug(prioritySelect.value) : 'priority-select-none'}`;
+    });
 
     const triageForm = container.querySelector('#triageForm');
     if (triageForm) triageForm.addEventListener('submit', async (ev) => {
