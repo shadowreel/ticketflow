@@ -101,14 +101,17 @@
 .pill.tone-neutral { color: var(--text-secondary); background: var(--bg-hover); }
 .pill.tone-neutral::before { display: none; }
 
-/* Selectores de prioridad editables (lista de incidencias, detalle) coloreados según el valor elegido */
-select.input.priority-select-baja { color: var(--priority-baja); border-color: var(--priority-baja); font-weight: var(--fw-semibold); }
-select.input.priority-select-media { color: var(--priority-media); border-color: var(--priority-media); font-weight: var(--fw-semibold); }
-select.input.priority-select-alta { color: var(--priority-alta); border-color: var(--priority-alta); font-weight: var(--fw-semibold); }
-select.input.priority-select-critica { color: var(--priority-critica); border-color: var(--priority-critica); font-weight: var(--fw-semibold); }
-select.input.priority-select-none { color: var(--text-tertiary); }
-/* El color de arriba solo debe verse en el valor cerrado del selector; las
-   opciones de la lista desplegada mantienen el color normal de texto. */
+/* Selectores de prioridad editables (lista de incidencias, detalle): el texto
+   siempre es blanco (igual que Estado); solo el borde indica la prioridad. */
+select.input.priority-select-baja { border-color: var(--priority-baja); }
+select.input.priority-select-media { border-color: var(--priority-media); }
+select.input.priority-select-alta { border-color: var(--priority-alta); }
+select.input.priority-select-critica { border-color: var(--priority-critica); }
+select.input.priority-select-baja,
+select.input.priority-select-media,
+select.input.priority-select-alta,
+select.input.priority-select-critica,
+select.input.priority-select-none,
 select.input.priority-select-baja option,
 select.input.priority-select-media option,
 select.input.priority-select-alta option,
