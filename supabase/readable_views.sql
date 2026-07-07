@@ -108,7 +108,7 @@ order by creado desc;
 
 
 -- -------------------------------------------------------------
--- 6) v_ubicaciones — catálogo de ubicaciones (Configuración → Gestión de Ubicaciones)
+-- 6) v_ubicaciones — catálogo de ubicaciones (pantalla "Ubicaciones" del menú)
 --    Vive dentro del setting "locations" (fila única de la colección "meta"),
 --    por eso se expande el arreglo con jsonb_array_elements en vez de filtrar por "collection".
 -- -------------------------------------------------------------
