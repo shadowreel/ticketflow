@@ -114,24 +114,27 @@
             </div>
 
             ${session.role === roles.ADMIN ? `
-              <div class="form-group">
-                <label for="priorityAdminSelect">Prioridad</label>
-                <select id="priorityAdminSelect" class="input">
-                  <option value="" ${!incident.priority ? 'selected' : ''}>Sin asignar</option>
-                  ${priorities.map((p) => `<option value="${p}" ${incident.priority === p ? 'selected' : ''}>${p}</option>`).join('')}
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="statusAdminSelect">Estado</label>
-                <select id="statusAdminSelect" class="input">${statusFlow.map((s) => `<option value="${s}" ${incident.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select>
-              </div>
-              <div class="form-group">
-                <label for="assignAdminSelect">Técnico asignado</label>
-                <select id="assignAdminSelect" class="input">
-                  <option value="">Sin asignar</option>
-                  ${technicians.map((t) => `<option value="${t.id}" ${incident.assignedTo && incident.assignedTo.id === t.id ? 'selected' : ''}>${escapeHtml(t.name)}</option>`).join('')}
-                </select>
-              </div>
+              <form id="triageForm" style="margin-top:4px;">
+                <div class="form-group">
+                  <label for="priorityAdminSelect">Prioridad</label>
+                  <select id="priorityAdminSelect" class="input">
+                    <option value="" ${!incident.priority ? 'selected' : ''}>Sin asignar</option>
+                    ${priorities.map((p) => `<option value="${p}" ${incident.priority === p ? 'selected' : ''}>${p}</option>`).join('')}
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="assignAdminSelect">Técnico asignado</label>
+                  <select id="assignAdminSelect" class="input">
+                    <option value="">Sin asignar</option>
+                    ${technicians.map((t) => `<option value="${t.id}" ${incident.assignedTo && incident.assignedTo.id === t.id ? 'selected' : ''}>${escapeHtml(t.name)}</option>`).join('')}
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="statusAdminSelect">Estado</label>
+                  <select id="statusAdminSelect" class="input">${statusFlow.map((s) => `<option value="${s}" ${incident.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Guardar cambios</button>
+              </form>
             ` : `
               <div class="detail-meta-item" style="margin-top:8px;"><div class="label">Técnico asignado</div><div class="value">${incident.assignedTo ? escapeHtml(incident.assignedTo.name) : 'Sin asignar'}</div></div>
             `}
@@ -211,25 +214,39 @@
     const editBtn = container.querySelector('#editIncidentBtn');
     if (editBtn) editBtn.addEventListener('click', () => openEditModal(incident, session));
 
-    const prioritySelect = container.querySelector('#priorityAdminSelect');
-    if (prioritySelect) prioritySelect.addEventListener('change', async () => {
-      await incidentService.updatePriority(incident.id, prioritySelect.value || null, session);
-      App.ui.toast.show({ type: 'success', title: 'Prioridad actualizada' });
-      render({ id: incident.id });
+    const triageForm = container.querySelector('#triageForm');
+    if (triageForm) triageForm.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const submitBtn = triageForm.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      try {
+        const newPriority = container.querySelector('#priorityAdminSelect').value || null;
+        const newTechId = container.querySelector('#assignAdminSelect').value;
+        const newStatus = container.querySelector('#statusAdminSelect').value;
+
+        if (newPriority !== (incident.priority || null)) {
+          await incidentService.updatePriority(incident.id, newPriority, session);
+        }
+        if (newTechId && (!incident.assignedTo || incident.assignedTo.id !== newTechId)) {
+          await incidentService.assign(incident.id, newTechId, session);
+        }
+        const latest = await incidentService.getById(incident.id);
+        if (newStatus !== latest.status) {
+          await incidentService.updateStatus(incident.id, newStatus, session);
+        }
+
+        App.ui.toast.show({ type: 'success', title: 'Cambios guardados', text: 'El técnico asignado recibirá una notificación.' });
+        render({ id: incident.id });
+      } catch (err) {
+        App.ui.toast.show({ type: 'danger', title: 'No se pudo guardar', text: err.message });
+        submitBtn.disabled = false;
+      }
     });
 
-    const statusSelect = container.querySelector('#statusAdminSelect') || container.querySelector('#statusTechSelect');
-    if (statusSelect) statusSelect.addEventListener('change', async () => {
-      await incidentService.updateStatus(incident.id, statusSelect.value, session);
+    const statusTechSelect = container.querySelector('#statusTechSelect');
+    if (statusTechSelect) statusTechSelect.addEventListener('change', async () => {
+      await incidentService.updateStatus(incident.id, statusTechSelect.value, session);
       App.ui.toast.show({ type: 'success', title: 'Estado actualizado' });
-      render({ id: incident.id });
-    });
-
-    const assignSelect = container.querySelector('#assignAdminSelect');
-    if (assignSelect) assignSelect.addEventListener('change', async () => {
-      if (!assignSelect.value) return;
-      await incidentService.assign(incident.id, assignSelect.value, session);
-      App.ui.toast.show({ type: 'success', title: 'Técnico asignado' });
       render({ id: incident.id });
     });
   }
