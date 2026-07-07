@@ -118,7 +118,13 @@
         ${session.role === roles.ADMIN ? `<td>${escapeHtml(inc.reportedBy.name)}</td>` : ''}
         <td>${escapeHtml(inc.category)}</td>
         <td>${escapeHtml(inc.location || '—')}</td>
-        <td><span class="pill ${inc.priority ? 'priority-' + slug(inc.priority) : 'tone-neutral'}">${escapeHtml(inc.priority || 'Sin asignar')}</span></td>
+        <td>
+          ${session.role === roles.ADMIN ? `
+          <select class="input priority-select" data-id="${inc.id}" style="height:30px;padding:0 8px;">
+            <option value="" ${!inc.priority ? 'selected' : ''}>Sin asignar</option>
+            ${priorities.map((p) => `<option value="${p}" ${inc.priority === p ? 'selected' : ''}>${p}</option>`).join('')}
+          </select>` : `<span class="pill ${inc.priority ? 'priority-' + slug(inc.priority) : 'tone-neutral'}">${escapeHtml(inc.priority || 'Sin asignar')}</span>`}
+        </td>
         <td>
           ${session.role === roles.ADMIN ? `
           <select class="input status-select" data-id="${inc.id}" style="height:30px;padding:0 8px;">
@@ -166,6 +172,13 @@
       sel.addEventListener('change', async () => {
         await incidentService.updateStatus(sel.dataset.id, sel.value, session);
         App.ui.toast.show({ type: 'success', title: 'Estado actualizado' });
+        render();
+      });
+    });
+    container.querySelectorAll('.priority-select').forEach((sel) => {
+      sel.addEventListener('change', async () => {
+        await incidentService.updatePriority(sel.dataset.id, sel.value || null, session);
+        App.ui.toast.show({ type: 'success', title: 'Prioridad actualizada' });
         render();
       });
     });
