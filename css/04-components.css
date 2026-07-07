@@ -107,6 +107,16 @@ select.input.priority-select-media { color: var(--priority-media); border-color:
 select.input.priority-select-alta { color: var(--priority-alta); border-color: var(--priority-alta); font-weight: var(--fw-semibold); }
 select.input.priority-select-critica { color: var(--priority-critica); border-color: var(--priority-critica); font-weight: var(--fw-semibold); }
 select.input.priority-select-none { color: var(--text-tertiary); }
+/* El color de arriba solo debe verse en el valor cerrado del selector; las
+   opciones de la lista desplegada mantienen el color normal de texto. */
+select.input.priority-select-baja option,
+select.input.priority-select-media option,
+select.input.priority-select-alta option,
+select.input.priority-select-critica option,
+select.input.priority-select-none option {
+  color: var(--text-primary);
+  font-weight: var(--fw-regular);
+}
 
 /* ---------- Formularios ---------- */
 .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: var(--space-4); }
