@@ -42,7 +42,7 @@
     container.innerHTML = `
       <div class="content-header">
         <div><h1>Reportes</h1><p>Genera reportes filtrados con datos reales del sistema y expórtalos.</p></div>
-        <button type="button" class="btn btn-primary" id="execReportBtn">${REPORT_ICON}<span>Generar Informe Ejecutivo</span></button>
+        <button type="button" class="btn btn-primary" id="execReportBtn">${REPORT_ICON}<span>Generar Informe Técnico</span></button>
       </div>
 
       <div class="toolbar">
@@ -84,7 +84,7 @@
         </select>
       </div>
 
-      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:var(--space-5);">
+      <div class="stats-grid">
         <div class="stat-card"><div class="stat-card-top"><span class="stat-label">Total</span></div><span class="stat-value">${report.summary.total}</span></div>
         <div class="stat-card"><div class="stat-card-top"><span class="stat-label">Resueltas</span></div><span class="stat-value">${report.summary.resolved}</span></div>
         <div class="stat-card"><div class="stat-card-top"><span class="stat-label">% Resueltas</span></div><span class="stat-value">${report.summary.resolvedPercentage == null ? '—' : report.summary.resolvedPercentage + '%'}</span></div>

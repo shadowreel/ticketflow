@@ -26,8 +26,8 @@
       </div>
 
       <div class="card card-pad" style="margin-bottom:var(--space-5);">
-        <form id="addLocationForm" style="display:flex;gap:8px;max-width:420px;">
-          <input type="text" id="newLocation" class="input" placeholder="Ej. Biblioteca, Aula 101, Dirección...">
+        <form id="addLocationForm" style="display:flex;gap:8px;flex-wrap:wrap;max-width:420px;">
+          <input type="text" id="newLocation" class="input" style="flex:1;min-width:180px;" placeholder="Ej. Biblioteca, Aula 101, Dirección...">
           <button type="submit" class="btn btn-primary">Agregar ubicación</button>
         </form>
       </div>

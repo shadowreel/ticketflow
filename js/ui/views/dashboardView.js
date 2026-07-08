@@ -160,7 +160,7 @@
 
       <div class="card card-pad" style="margin-top:var(--space-5);">
         <h3 style="margin-bottom:14px;">Centro de Control</h3>
-        <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
+        <div class="stats-grid" style="margin-bottom:0;">
           ${statCard(ICONS.pending, 'warning', 'Incidencias pendientes', s.pending)}
           ${statCard(ICONS.critical, 'danger', 'Incidencias críticas', s.byPriority['Crítica'] || 0)}
           ${statCard(ICONS.wrench, 'accent', 'Técnicos activos', perf.activeTechnicians)}

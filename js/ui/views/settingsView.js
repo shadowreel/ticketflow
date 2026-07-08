@@ -59,8 +59,8 @@
         <h3>Categorías de incidencia</h3>
         <p>Estas categorías aparecen al reportar una incidencia.</p>
         <div class="tag-editable-list" id="categoryList"></div>
-        <form id="addCategoryForm" style="display:flex;gap:8px;margin-top:16px;max-width:360px;">
-          <input type="text" id="newCategory" class="input" placeholder="Nueva categoría">
+        <form id="addCategoryForm" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;max-width:360px;">
+          <input type="text" id="newCategory" class="input" style="flex:1;min-width:140px;" placeholder="Nueva categoría">
           <button type="submit" class="btn btn-secondary">Agregar</button>
         </form>
       </div>
@@ -68,7 +68,7 @@
       <div class="card card-pad settings-section">
         <h3>Tiempo objetivo de resolución (SLA)</h3>
         <p>Minutos esperados de resolución según prioridad. Se usa para medir el cumplimiento en las estadísticas.</p>
-        <div id="slaForm" class="form-row" style="grid-template-columns:repeat(4,1fr);"></div>
+        <div id="slaForm" class="form-row"></div>
         <button type="button" class="btn btn-secondary" id="saveSlaBtn" style="margin-top:12px;">Guardar SLA</button>
       </div>
 
