@@ -116,6 +116,11 @@
       <div class="dni-greeting">¡Hola, ${escapeHtml(state.dniNombre)}!</div>
       ${alertHtml()}
       <form id="dniPasswordForm">
+        ${isRegister ? `
+        <div class="form-group">
+          <label for="dniEmail">Correo</label>
+          <input type="email" id="dniEmail" class="input" placeholder="tu@correo.com" required>
+        </div>` : ''}
         <div class="form-group">
           <label for="dniPassword">${isRegister ? 'Crea tu contraseña' : 'Contraseña'}</label>
           <div class="password-field">
@@ -135,10 +140,11 @@
     container.querySelector('#dniPasswordForm').addEventListener('submit', async (ev) => {
       ev.preventDefault();
       const password = container.querySelector('#dniPassword').value;
+      const email = isRegister ? container.querySelector('#dniEmail').value.trim() : null;
       setState({ loading: true, error: '' });
       try {
         const session = isRegister
-          ? await auth.registerUserDni(state.dniValue, password)
+          ? await auth.registerUserDni(state.dniValue, password, email)
           : await auth.loginUserDni(state.dniValue, password);
         await finishLogin(session);
       } catch (err) {

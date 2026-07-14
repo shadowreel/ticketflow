@@ -29,13 +29,13 @@
   }
 
   async function check(dni) { return call('check', { dni }); }
-  async function register(dni, password) { return call('register', { dni, password }); }
+  async function register(dni, password, email) { return call('register', { dni, password, email }); }
   async function login(dni, password) { return call('login', { dni, password }); }
   async function changePassword(dni, currentPassword, newPassword) {
     return call('change_password', { dni, currentPassword, newPassword });
   }
 
-  async function addDni(dni, nombre) { return call('add_dni', { dni, nombre }); }
+  async function addDni(dni, nombres, apellidos) { return call('add_dni', { dni, nombres, apellidos }); }
   async function listDni() {
     const { items } = await call('list_dni', {});
     return items || [];

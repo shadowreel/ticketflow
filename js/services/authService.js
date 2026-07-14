@@ -99,8 +99,8 @@
     return dniService.check(dni);
   }
 
-  async function registerUserDni(dni, password) {
-    const result = await dniService.register(dni, password);
+  async function registerUserDni(dni, password, email) {
+    const result = await dniService.register(dni, password, email);
     const session = toSessionFromDni(result);
     writeSession(session);
     bus.emit('user:registered', session);

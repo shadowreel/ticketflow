@@ -147,9 +147,13 @@
             <label for="newDni">DNI</label>
             <input type="text" id="newDni" class="input" placeholder="Ej. 12345678" inputmode="numeric" maxlength="8" required>
           </div>
-          <div class="form-group" style="flex:2;min-width:180px;margin-bottom:0;">
-            <label for="newDniName">Nombre completo</label>
-            <input type="text" id="newDniName" class="input" placeholder="Ej. María Pérez" required>
+          <div class="form-group" style="flex:1;min-width:160px;margin-bottom:0;">
+            <label for="newDniNombres">Nombres</label>
+            <input type="text" id="newDniNombres" class="input" placeholder="Ej. María" required>
+          </div>
+          <div class="form-group" style="flex:1;min-width:160px;margin-bottom:0;">
+            <label for="newDniApellidos">Apellidos</label>
+            <input type="text" id="newDniApellidos" class="input" placeholder="Ej. Pérez Gómez" required>
           </div>
           <button type="submit" class="btn btn-primary">${PLUS_ICON}<span>Agregar DNI</span></button>
         </form>
@@ -158,12 +162,13 @@
         ${loadError ? `<div class="empty-state"><h4>No se pudo cargar</h4><p>${escapeHtml(loadError)}</p></div>` : (entries.length ? `
         <div class="table-wrap">
           <table class="data-table">
-            <thead><tr><th>DNI</th><th>Nombre</th><th>Agregado</th><th></th></tr></thead>
+            <thead><tr><th>DNI</th><th>Nombres</th><th>Apellidos</th><th>Agregado</th><th></th></tr></thead>
             <tbody>
               ${entries.map((e) => `
                 <tr>
                   <td class="mono">${escapeHtml(e.dni)}</td>
-                  <td>${escapeHtml(e.nombre)}</td>
+                  <td>${escapeHtml(e.nombres)}</td>
+                  <td>${escapeHtml(e.apellidos)}</td>
                   <td class="text-tertiary">${formatDate(e.createdAt)}</td>
                   <td><div class="row-actions"><button type="button" class="action-btn danger" data-remove-dni="${e.id}" title="Eliminar">${TRASH_ICON}</button></div></td>
                 </tr>`).join('')}
@@ -177,9 +182,10 @@
     container.querySelector('#addDniForm').addEventListener('submit', async (ev) => {
       ev.preventDefault();
       const dni = container.querySelector('#newDni').value.trim();
-      const nombre = container.querySelector('#newDniName').value.trim();
+      const nombres = container.querySelector('#newDniNombres').value.trim();
+      const apellidos = container.querySelector('#newDniApellidos').value.trim();
       try {
-        await dniService.addDni(dni, nombre);
+        await dniService.addDni(dni, nombres, apellidos);
         App.ui.toast.show({ type: 'success', title: 'DNI agregado' });
         render();
       } catch (err) {

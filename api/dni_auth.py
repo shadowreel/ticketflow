@@ -150,6 +150,13 @@ def find_user_by_dni(dni):
     return None
 
 
+def full_name(entry):
+    """Nombre para mostrar: primero los nombres, luego los apellidos."""
+    nombres = (entry.get("nombres") or "").strip()
+    apellidos = (entry.get("apellidos") or "").strip()
+    return f"{nombres} {apellidos}".strip()
+
+
 def action_check(payload):
     dni = normalize_dni(payload.get("dni"))
     entry = find_whitelist_entry(dni)
@@ -157,15 +164,18 @@ def action_check(payload):
         return {"status": "not_found"}
     user = find_user_by_dni(dni)
     if user:
-        return {"status": "has_account", "nombre": entry.get("nombre")}
-    return {"status": "needs_password", "nombre": entry.get("nombre")}
+        return {"status": "has_account", "nombre": full_name(entry)}
+    return {"status": "needs_password", "nombre": full_name(entry)}
 
 
 def action_register(payload):
     dni = normalize_dni(payload.get("dni"))
     password = str(payload.get("password") or "")
+    email = str(payload.get("email") or "").strip().lower()
     if len(password) < 6:
         raise ApiError("La contraseña debe tener al menos 6 caracteres.")
+    if "@" not in email or "." not in email.split("@")[-1]:
+        raise ApiError("Ingresa un correo válido.")
 
     entry = find_whitelist_entry(dni)
     if not entry:
@@ -176,7 +186,8 @@ def action_register(payload):
     record_id = str(uuid.uuid4())
     fields = {
         "dni": dni,
-        "name": entry.get("nombre"),
+        "name": full_name(entry),
+        "email": email,
         "passwordHash": hash_password(password),
         "active": True,
         "avatar": None,
@@ -220,16 +231,17 @@ def action_change_password(payload):
 
 def action_add_dni(payload):
     dni = normalize_dni(payload.get("dni"))
-    nombre = str(payload.get("nombre") or "").strip()
-    if not nombre:
-        raise ApiError("El nombre es obligatorio.")
+    nombres = str(payload.get("nombres") or "").strip()
+    apellidos = str(payload.get("apellidos") or "").strip()
+    if not nombres or not apellidos:
+        raise ApiError("Nombres y apellidos son obligatorios.")
     if find_whitelist_entry(dni):
         raise ApiError("Ese DNI ya está autorizado.", 409)
 
     record_id = str(uuid.uuid4())
-    fields = {"dni": dni, "nombre": nombre, "createdAt": int(time.time() * 1000)}
+    fields = {"dni": dni, "nombres": nombres, "apellidos": apellidos, "createdAt": int(time.time() * 1000)}
     sb_insert("dni_whitelist", record_id, fields)
-    return {"id": record_id, "dni": dni, "nombre": nombre}
+    return {"id": record_id, "dni": dni, "nombres": nombres, "apellidos": apellidos}
 
 
 def action_list_dni(payload):

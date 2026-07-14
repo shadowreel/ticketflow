@@ -6,7 +6,7 @@
 --  sin rediseñar tablas cada vez. Es ideal para el código, pero
 --  incómodo de leer a simple vista en el dashboard.
 --
---  Este script crea 5 VISTAS (tablas de solo lectura, no ocupan
+--  Este script crea 8 VISTAS (tablas de solo lectura, no ocupan
 --  espacio ni duplican datos: se calculan al vuelo) con columnas
 --  normales en español en vez de JSON crudo. Aparecen solas en
 --  Table Editor, en la sección "Views".
@@ -53,14 +53,17 @@ order by nombre;
 
 
 -- -------------------------------------------------------------
--- 3) v_usuarios — usuarios finales autorregistrados
+-- 3) v_usuarios — usuarios finales (registrados por DNI o, si
+--    quedó alguna cuenta antigua, por correo)
 -- -------------------------------------------------------------
 drop view if exists v_usuarios;
 create view v_usuarios as
 select
   id                                                     as id,
   record ->> 'name'                                      as nombre,
+  record ->> 'dni'                                       as dni,
   record ->> 'email'                                     as correo,
+  coalesce((record ->> 'active')::boolean, true)         as activo,
   to_timestamp((record ->> 'createdAt')::bigint / 1000)  as creado
 from ticketflow_data
 where collection = 'users'
@@ -140,6 +143,23 @@ select
 from ticketflow_data
 where collection = 'audit_log'
 order by fecha desc;
+
+
+-- -------------------------------------------------------------
+-- 8) v_dni_whitelist — DNIs autorizados por el admin a registrarse
+--    como "Usuario final" (pantalla Usuarios → DNIs autorizados)
+-- -------------------------------------------------------------
+drop view if exists v_dni_whitelist;
+create view v_dni_whitelist as
+select
+  id                                                     as id,
+  record ->> 'dni'                                       as dni,
+  record ->> 'nombres'                                   as nombres,
+  record ->> 'apellidos'                                 as apellidos,
+  to_timestamp((record ->> 'createdAt')::bigint / 1000)  as agregado
+from ticketflow_data
+where collection = 'dni_whitelist'
+order by agregado desc;
 
 
 -- =============================================================
