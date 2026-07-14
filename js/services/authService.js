@@ -16,6 +16,7 @@
   const adminRepo = App.data.adminRepository;
   const technicianRepo = App.data.technicianRepository;
   const userRepo = App.data.userRepository;
+  const dniService = App.services.dniService;
 
   function readSession() {
     try {
@@ -90,6 +91,29 @@
     return session;
   }
 
+  function toSessionFromDni(result) {
+    return { id: result.id, role: roles.USER, name: result.name, dni: result.dni, avatar: null };
+  }
+
+  async function checkDni(dni) {
+    return dniService.check(dni);
+  }
+
+  async function registerUserDni(dni, password) {
+    const result = await dniService.register(dni, password);
+    const session = toSessionFromDni(result);
+    writeSession(session);
+    bus.emit('user:registered', session);
+    return session;
+  }
+
+  async function loginUserDni(dni, password) {
+    const result = await dniService.login(dni, password);
+    const session = toSessionFromDni(result);
+    writeSession(session);
+    return session;
+  }
+
   async function getCurrentRecord() {
     const session = readSession();
     if (!session) return null;
@@ -98,7 +122,23 @@
     return userRepo.getById(session.id);
   }
 
+  // Guarda temporalmente la contraseña ya verificada de un usuario DNI entre
+  // verifyCurrentPassword() y changePassword() (su hash vive en Python, no
+  // se puede comparar en el navegador como con admin/técnico/usuario email).
+  let pendingDniPassword = null;
+
   async function verifyCurrentPassword(password) {
+    const session = readSession();
+    if (session && session.dni) {
+      try {
+        await dniService.login(session.dni, password);
+        pendingDniPassword = password;
+        return true;
+      } catch {
+        pendingDniPassword = null;
+        return false;
+      }
+    }
     const record = await getCurrentRecord();
     if (!record) return false;
     const passwordHash = await hashPassword(password);
@@ -108,6 +148,14 @@
   async function changePassword(newPassword) {
     const session = readSession();
     if (!session) throw new Error('No hay sesión activa.');
+
+    if (session.dni) {
+      if (!pendingDniPassword) throw new Error('Verifica tu contraseña actual primero.');
+      await dniService.changePassword(session.dni, pendingDniPassword, newPassword);
+      pendingDniPassword = null;
+      return session;
+    }
+
     const passwordHash = await hashPassword(newPassword);
     if (session.role === roles.ADMIN) {
       await adminRepo.update(session.id, { passwordHash, mustChangePassword: false });
@@ -136,6 +184,7 @@
   App.services = App.services || {};
   App.services.authService = {
     loginStaff, registerUser, loginUser,
+    checkDni, registerUserDni, loginUserDni,
     changePassword, verifyCurrentPassword, getCurrentRecord,
     updateSessionProfile, getCurrentSession, logout,
   };

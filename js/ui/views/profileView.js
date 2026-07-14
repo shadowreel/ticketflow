@@ -42,11 +42,17 @@
                 <label for="profileName">Nombre completo</label>
                 <input type="text" id="profileName" class="input" value="${escapeHtml(record.name)}" required>
               </div>
+              ${record.email ? `
               <div class="form-group">
                 <label for="profileEmail">Correo</label>
                 <input type="email" id="profileEmail" class="input" value="${escapeHtml(record.email)}" disabled>
                 <span class="input-hint">El correo es tu identificador de inicio de sesión y no se puede cambiar.</span>
-              </div>
+              </div>` : `
+              <div class="form-group">
+                <label for="profileDni">DNI</label>
+                <input type="text" id="profileDni" class="input mono" value="${escapeHtml(record.dni || '')}" disabled>
+                <span class="input-hint">El DNI es tu identificador de inicio de sesión y no se puede cambiar.</span>
+              </div>`}
               ${session.role === roles.TECHNICIAN ? `
               <div class="form-group">
                 <label>Cargo</label>

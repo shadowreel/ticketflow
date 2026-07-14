@@ -7,3 +7,7 @@ Thumbs.db
 
 # Configuración local del entorno de desarrollo (no forma parte del producto)
 .claude/
+
+# Bytecode compilado de Python (funciones serverless en api/)
+__pycache__/
+*.pyc

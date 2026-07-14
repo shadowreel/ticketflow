@@ -33,6 +33,22 @@
 
 .login-hint { font-size: var(--fs-xs); color: var(--text-tertiary); text-align: center; margin-top: var(--space-5); line-height: 1.5; }
 .login-hint strong { color: var(--text-secondary); }
+
+.dni-greeting {
+  text-align: center;
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-5);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .dni-greeting { animation: dniGreetingIn 700ms ease-out; }
+}
+@keyframes dniGreetingIn {
+  0% { opacity: 0; transform: translateY(10px) scale(0.94); text-shadow: 0 0 0 transparent; }
+  55% { opacity: 1; transform: translateY(0) scale(1.03); text-shadow: 0 0 18px var(--accent-glow); }
+  100% { opacity: 1; transform: translateY(0) scale(1); text-shadow: 0 0 0 transparent; }
+}
 .login-switch { text-align: center; font-size: var(--fs-sm); color: var(--text-secondary); margin-top: var(--space-4); }
 .login-switch button { color: var(--accent-400); font-weight: var(--fw-semibold); }
 

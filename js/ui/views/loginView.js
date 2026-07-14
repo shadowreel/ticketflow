@@ -11,8 +11,11 @@
   const root = () => document.getElementById('loginScreen');
 
   let state = {
-    tab: 'staff',       // 'staff' | 'user'
-    userMode: 'login',  // 'login' | 'register'
+    tab: 'staff',        // 'staff' | 'user'
+    dniStep: 'enter',    // 'enter' | 'password'
+    dniValue: '',
+    dniNombre: '',
+    dniMode: 'login',    // 'login' | 'register' (solo aplica en dniStep 'password')
     error: '',
     loading: false,
   };
@@ -68,82 +71,83 @@
   }
 
   function renderUserPanel(container) {
-    if (state.userMode === 'login') {
+    if (state.dniStep === 'enter') {
       container.innerHTML = `
         ${alertHtml()}
-        <form id="userLoginForm">
+        <form id="dniCheckForm">
           <div class="form-group">
-            <label for="userEmail">Correo</label>
-            <input type="email" id="userEmail" class="input" placeholder="tu@correo.com" required autofocus>
-          </div>
-          <div class="form-group">
-            <label for="userPassword">Contraseña</label>
-            <div class="password-field">
-              <input type="password" id="userPassword" class="input" placeholder="Tu contraseña" required>
-              ${passwordToggleHtml('userPassword')}
-            </div>
+            <label for="dniInput">DNI</label>
+            <input type="text" id="dniInput" class="input" placeholder="Ej. 12345678" required autofocus
+              inputmode="numeric" maxlength="8" autocomplete="off" value="${escapeHtml(state.dniValue)}">
           </div>
           <button type="submit" class="btn btn-primary btn-block" ${state.loading ? 'disabled' : ''}>
-            ${state.loading ? '<span class="spinner"></span>' : 'Iniciar sesión'}
+            ${state.loading ? '<span class="spinner"></span>' : 'Continuar'}
           </button>
         </form>
-        <div class="login-switch">¿No tienes cuenta? <button type="button" id="toRegister">Regístrate</button></div>
+        <p class="login-hint">Solo el personal autorizado por el administrador puede registrarse aquí.</p>
       `;
-      wirePasswordToggles(container);
-      container.querySelector('#userLoginForm').addEventListener('submit', async (ev) => {
+      container.querySelector('#dniCheckForm').addEventListener('submit', async (ev) => {
         ev.preventDefault();
-        const email = container.querySelector('#userEmail').value.trim();
-        const password = container.querySelector('#userPassword').value;
+        const dni = container.querySelector('#dniInput').value.trim();
         setState({ loading: true, error: '' });
         try {
-          const session = await auth.loginUser(email, password);
-          await finishLogin(session);
+          const result = await auth.checkDni(dni);
+          if (result.status === 'not_found') {
+            setState({ loading: false, error: 'Este DNI no está autorizado. Contacta al administrador.' });
+            return;
+          }
+          setState({
+            loading: false,
+            error: '',
+            dniValue: dni,
+            dniNombre: result.nombre,
+            dniMode: result.status === 'has_account' ? 'login' : 'register',
+            dniStep: 'password',
+          });
         } catch (err) {
           setState({ loading: false, error: err.message });
         }
       });
-      container.querySelector('#toRegister').addEventListener('click', () => setState({ userMode: 'register', error: '' }));
-    } else {
-      container.innerHTML = `
-        ${alertHtml()}
-        <form id="userRegisterForm">
-          <div class="form-group">
-            <label for="regName">Nombre completo</label>
-            <input type="text" id="regName" class="input" placeholder="Ej. María Pérez" required autofocus>
-          </div>
-          <div class="form-group">
-            <label for="regEmail">Correo</label>
-            <input type="email" id="regEmail" class="input" placeholder="tu@correo.com" required>
-          </div>
-          <div class="form-group">
-            <label for="regPassword">Contraseña</label>
-            <div class="password-field">
-              <input type="password" id="regPassword" class="input" placeholder="Mínimo 6 caracteres" minlength="6" required>
-              ${passwordToggleHtml('regPassword')}
-            </div>
-          </div>
-          <button type="submit" class="btn btn-primary btn-block" ${state.loading ? 'disabled' : ''}>
-            ${state.loading ? '<span class="spinner"></span>' : 'Crear cuenta'}
-          </button>
-        </form>
-        <div class="login-switch">¿Ya tienes cuenta? <button type="button" id="toLogin">Inicia sesión</button></div>
-      `;
-      wirePasswordToggles(container);
-      container.querySelector('#userRegisterForm').addEventListener('submit', async (ev) => {
-        ev.preventDefault();
-        const name = container.querySelector('#regName').value.trim();
-        const email = container.querySelector('#regEmail').value.trim();
-        const password = container.querySelector('#regPassword').value;
-        setState({ loading: true, error: '' });
-        try {
-          const session = await auth.registerUser({ name, email, password });
-          await finishLogin(session);
-        } catch (err) {
-          setState({ loading: false, error: err.message });
-        }
-      });
-      container.querySelector('#toLogin').addEventListener('click', () => setState({ userMode: 'login', error: '' }));
+      return;
     }
+
+    const isRegister = state.dniMode === 'register';
+    container.innerHTML = `
+      <div class="dni-greeting">¡Hola, ${escapeHtml(state.dniNombre)}!</div>
+      ${alertHtml()}
+      <form id="dniPasswordForm">
+        <div class="form-group">
+          <label for="dniPassword">${isRegister ? 'Crea tu contraseña' : 'Contraseña'}</label>
+          <div class="password-field">
+            <input type="password" id="dniPassword" class="input"
+              placeholder="${isRegister ? 'Mínimo 6 caracteres' : 'Tu contraseña'}"
+              ${isRegister ? 'minlength="6"' : ''} required autofocus>
+            ${passwordToggleHtml('dniPassword')}
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" ${state.loading ? 'disabled' : ''}>
+          ${state.loading ? '<span class="spinner"></span>' : (isRegister ? 'Crear cuenta' : 'Ingresar')}
+        </button>
+      </form>
+      <div class="login-switch"><button type="button" id="dniBack">← Usar otro DNI</button></div>
+    `;
+    wirePasswordToggles(container);
+    container.querySelector('#dniPasswordForm').addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const password = container.querySelector('#dniPassword').value;
+      setState({ loading: true, error: '' });
+      try {
+        const session = isRegister
+          ? await auth.registerUserDni(state.dniValue, password)
+          : await auth.loginUserDni(state.dniValue, password);
+        await finishLogin(session);
+      } catch (err) {
+        setState({ loading: false, error: err.message });
+      }
+    });
+    container.querySelector('#dniBack').addEventListener('click', () => {
+      setState({ dniStep: 'enter', dniValue: '', dniNombre: '', error: '' });
+    });
   }
 
   async function finishLogin(session) {
@@ -223,7 +227,9 @@
       </div>
     `;
     container.querySelectorAll('[data-tab]').forEach((btn) => {
-      btn.addEventListener('click', () => setState({ tab: btn.dataset.tab, error: '' }));
+      btn.addEventListener('click', () => setState({
+        tab: btn.dataset.tab, error: '', dniStep: 'enter', dniValue: '', dniNombre: '',
+      }));
     });
     const panel = container.querySelector('#authPanel');
     if (state.tab === 'staff') renderStaffPanel(panel);
@@ -241,7 +247,10 @@
   }
 
   function mount() {
-    state = { tab: 'staff', userMode: 'login', error: '', loading: false };
+    state = {
+      tab: 'staff', dniStep: 'enter', dniValue: '', dniNombre: '', dniMode: 'login',
+      error: '', loading: false,
+    };
     render();
   }
 
